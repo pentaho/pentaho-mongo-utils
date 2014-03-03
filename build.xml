@@ -1,0 +1,53 @@
+<project name="Pentaho Platform Mongo OLAP Plugin" basedir="." default="default" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+  <import file="build-res/subfloor.xml" />
+  <!--=======================================================================
+      continuous
+
+      Runs a typical continuous integration build including project dist, javadoc, test,
+      and coverage artifacts
+      ====================================================================-->
+  <target name="continuous" depends="clean-all,resolve,dist,cobertura,publish" />
+  <target name="jar" depends="jar.main,jar.test">
+    <exec executable="java" failonerror="true">
+      <arg value="-jar" />
+      <arg value="lib/bnd-2.3.0.jar" />
+      <arg value="wrap" />
+      <arg value="--properties" />
+      <arg value="pentaho-mongo-utils.bnd" />
+      <arg value="--output" />
+      <arg value="${dist.dir}/${ivy.artifact.id}-${project.revision}.jar" />
+      <arg value="${dist.dir}/${ivy.artifact.id}-${project.revision}-noosgi.jar" />
+    </exec>
+    <delete file="${dist.dir}/${ivy.artifact.id}-${project.revision}-noosgi.jar" />
+  </target>
+  <target name="jar.main" depends="compile,set-build.id,generate.manifest">
+    <jar destfile="${dist.dir}/${ivy.artifact.id}-${project.revision}-noosgi.jar" manifest="${dist.manifest.file}">
+      <fileset dir="${classes.dir}" />
+    </jar>
+  </target>
+  <target name="dist" depends="jar" description="Creates a distribution" />
+  <target name="publish" depends="dist, dist-source, publish-nojar">
+    <antcall target="publish-nojar.internal">
+      <param name="source.publish" value="false" />
+      <param name="ivy.artifact.id" value="${ivy.artifact.id.plain}" />
+    </antcall>
+  </target>
+  <target name="publish-local" depends="dist, dist-source, publish-local-nojar">
+    <antcall target="publish-local-nojar.internal">
+      <param name="source.publish" value="false" />
+      <param name="ivy.artifact.id" value="${ivy.artifact.id.plain}" />
+    </antcall>
+  </target>
+  <target name="runtest" description="Runs the test you specify on the command line with -Dtest=" depends="">
+    <junit printsummary="withOutAndErr" fork="no">
+      <classpath refid="test.classpath" />
+      <formatter type="plain" usefile="false" />
+      <batchtest>
+        <fileset dir="${testsrc.dir}">
+          <include name="**/${test}.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+</project>

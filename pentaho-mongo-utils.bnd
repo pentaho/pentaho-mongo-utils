@@ -1,0 +1,2 @@
+Import-Package: com.mongodb,com.mongodb.util
+Export-Package: *
