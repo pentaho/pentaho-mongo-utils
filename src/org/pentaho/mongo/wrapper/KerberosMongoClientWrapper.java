@@ -1,18 +1,16 @@
 package org.pentaho.mongo.wrapper;
 
-import org.pentaho.mongo.AuthContext;
-import org.pentaho.mongo.KerberosHelper;
-import org.pentaho.mongo.MongoUtilLogger;
-import org.pentaho.mongo.MongoDbException;
-import org.pentaho.mongo.MongoProp;
-import org.pentaho.mongo.MongoProperties;
-import org.pentaho.mongo.wrapper.collection.KerberosMongoCollectionWrapper;
-import org.pentaho.mongo.wrapper.collection.MongoCollectionWrapper;
-
-import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
+import org.pentaho.mongo.AuthContext;
+import org.pentaho.mongo.KerberosHelper;
+import org.pentaho.mongo.MongoDbException;
+import org.pentaho.mongo.MongoProp;
+import org.pentaho.mongo.MongoProperties;
+import org.pentaho.mongo.MongoUtilLogger;
+import org.pentaho.mongo.wrapper.collection.KerberosMongoCollectionWrapper;
+import org.pentaho.mongo.wrapper.collection.MongoCollectionWrapper;
 
 public class KerberosMongoClientWrapper extends UsernamePasswordMongoClientWrapper {
   private final AuthContext authContext;
@@ -34,11 +32,6 @@ public class KerberosMongoClientWrapper extends UsernamePasswordMongoClientWrapp
   protected MongoCredential getCredential( MongoProperties props ) {
     return MongoCredential.createGSSAPICredential(
       props.get( MongoProp.USER ) );
-  }
-
-  @Override
-  protected void authenticateWithDb( DB db ) throws MongoDbException {
-    // noop
   }
 
   @Override
