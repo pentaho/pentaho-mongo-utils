@@ -3,7 +3,6 @@ package org.pentaho.mongo.wrapper;
 import com.mongodb.DBObject;
 import org.pentaho.mongo.MongoDbException;
 import org.pentaho.mongo.wrapper.collection.MongoCollectionWrapper;
-import org.pentaho.mongo.wrapper.field.MongoField;
 
 import java.util.List;
 import java.util.Set;
@@ -12,9 +11,6 @@ public interface MongoClientWrapper {
   public Set<String> getCollectionsNames( String dB ) throws MongoDbException;
 
   public List<String> getIndexInfo( String dbName, String collection ) throws MongoDbException;
-
-  public List<MongoField> discoverFields( String db, String collection, String query, String fields,
-      boolean isPipeline, int docsToSample ) throws MongoDbException;
 
   /**
    * Retrieve all database names found in MongoDB as visible by the authenticated user.
