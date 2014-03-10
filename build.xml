@@ -27,6 +27,7 @@
     </jar>
   </target>
   <target name="dist" depends="jar" description="Creates a distribution" />
+  <!--
   <target name="publish" depends="dist, dist-source, publish-nojar">
     <antcall target="publish-nojar.internal">
       <param name="source.publish" value="false" />
@@ -39,6 +40,7 @@
       <param name="ivy.artifact.id" value="${ivy.artifact.id.plain}" />
     </antcall>
   </target>
+  -->
   <target name="runtest" description="Runs the test you specify on the command line with -Dtest=" depends="">
     <junit printsummary="withOutAndErr" fork="no">
       <classpath refid="test.classpath" />
