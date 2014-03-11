@@ -32,4 +32,8 @@ public interface MongoCollectionWrapper {
   void createIndex( BasicDBObject mongoIndex ) throws MongoDbException;
 
   WriteResult save( DBObject toTry ) throws MongoDbException;
+
+  long count() throws MongoDbException;
+
+  List distinct( String key ) throws MongoDbException;
 }

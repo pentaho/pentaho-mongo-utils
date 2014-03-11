@@ -57,6 +57,9 @@ public class UserPassAuthTest extends TestBase {
     collectionWrapper.insert( dbObjects );
     assertEquals( "bar", collectionWrapper.find().next().get( "foo" ) );
 
+    assertEquals( 1, collectionWrapper.count() );
+    assertEquals( "bar", collectionWrapper.distinct( "foo" ).get( 0 ) );
+
     collectionWrapper.drop();
     assertFalse( clientWrapper.getCollectionsNames( db ).contains( tempCollection ) );
 

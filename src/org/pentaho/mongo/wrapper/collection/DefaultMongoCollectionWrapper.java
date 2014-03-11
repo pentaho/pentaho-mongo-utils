@@ -71,6 +71,14 @@ public class DefaultMongoCollectionWrapper implements MongoCollectionWrapper {
     return collection.save( toTry );
   }
 
+  @Override public long count() throws MongoDbException {
+    return collection.count();
+  }
+
+  @Override public List distinct( String key ) throws MongoDbException {
+    return collection.distinct( key );
+  }
+
   protected MongoCursorWrapper wrap( DBCursor cursor ) {
     return new DefaultCursorWrapper( cursor );
   }
