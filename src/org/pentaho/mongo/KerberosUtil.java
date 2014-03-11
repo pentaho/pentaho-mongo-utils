@@ -1,5 +1,5 @@
 /*!
-* Copyright 2010 - 2013 Pentaho Corporation.  All rights reserved.
+* Copyright 2010 - 2014 Pentaho Corporation.  All rights reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 package org.pentaho.mongo;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 import com.sun.security.auth.module.Krb5LoginModule;
+import org.pentaho.mongo.wrapper.KerberosMongoClientWrapper;
 
 /**
  * A collection of utilities for working with Kerberos.
@@ -147,6 +149,27 @@ public class KerberosUtil {
      * configured JAAS Configuration file.
      */
     EXTERNAL;
+
+
+    public static JaasAuthenticationMode byName( String modeName ) throws MongoDbException {
+      if ( modeName == null ) {
+        // default value
+        return KERBEROS_USER;
+      }
+
+      for ( JaasAuthenticationMode mode : JaasAuthenticationMode.values() ) {
+
+        if ( mode.name().equalsIgnoreCase( modeName ) ) {
+          return mode;
+        }
+      }
+      throw new MongoDbException( BaseMessages.getString(
+        KerberosMongoClientWrapper.class,
+        "MongoKerberosWrapper.Message.Error.JaasAuthModeIncorrect",
+        Arrays.toString( JaasAuthenticationMode.values() ),
+        "'" + modeName + "'" ) );
+    }
+
   }
 
 
@@ -177,6 +200,7 @@ public class KerberosUtil {
       case EXTERNAL:
         // Use the default JAAS configuration by only supplying the app name
         lc = new LoginContext( KERBEROS_APP_NAME );
+        break;
       case KERBEROS_USER:
         subject = new Subject();
         lc = new LoginContext( KERBEROS_APP_NAME, subject, null,
