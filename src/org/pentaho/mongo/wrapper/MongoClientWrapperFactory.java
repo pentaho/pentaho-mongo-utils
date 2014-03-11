@@ -10,7 +10,7 @@ import org.pentaho.mongo.MongoProperties;
 
 public class MongoClientWrapperFactory {
   public static MongoClientWrapper createMongoClientWrapper( MongoProperties props, MongoUtilLogger log )
-      throws MongoDbException {
+    throws MongoDbException {
     if ( Boolean.parseBoolean( props.get( MongoProp.USE_KERBEROS ) ) ) {
       KerberosMongoClientWrapper wrapper = new KerberosMongoClientWrapper( props, log );
       return (MongoClientWrapper) Proxy.newProxyInstance( wrapper.getClass().getClassLoader(),

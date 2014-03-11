@@ -42,7 +42,7 @@ public class DefaultMongoCollectionWrapper implements MongoCollectionWrapper {
 
   @Override
   public WriteResult update( DBObject updateQuery, DBObject insertUpdate, boolean upsert, boolean multi )
-      throws MongoDbException {
+    throws MongoDbException {
     return collection.update( updateQuery, insertUpdate, upsert, multi );
   }
 

@@ -48,7 +48,7 @@ public class NoAuthMongoClientWrapper implements MongoClientWrapper {
    * @throws MongoDbException if a problem occurs
    */
   public NoAuthMongoClientWrapper( MongoProperties props, MongoUtilLogger log )
-      throws MongoDbException {
+    throws MongoDbException {
     this.log = log;
     mongo = initConnection( props, log );
   }
@@ -63,7 +63,7 @@ public class NoAuthMongoClientWrapper implements MongoClientWrapper {
   }
 
   private MongoClient initConnection( MongoProperties props, MongoUtilLogger log )
-      throws MongoDbException {
+    throws MongoDbException {
     String hostsPorts = props.get( MongoProp.HOST );
     String singlePort = props.get( MongoProp.PORT );
     String connTimeout = props.get( MongoProp.CONNECT_TIMEOUT );
@@ -166,7 +166,7 @@ public class NoAuthMongoClientWrapper implements MongoClientWrapper {
                                            String socketTimeout, String readPreference, String writeConcern,
                                            String wTimeout, boolean journaled,
                                            List<String> tagSet, MongoProperties props, MongoUtilLogger log )
-      throws MongoDbException {
+    throws MongoDbException {
 
     // connection timeout
     if ( !Util.isEmpty( connTimeout ) ) {

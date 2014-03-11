@@ -26,7 +26,7 @@ public class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper
    * @throws MongoDbException if a problem occurs
    */
   public UsernamePasswordMongoClientWrapper( MongoProperties props, MongoUtilLogger log )
-      throws MongoDbException {
+    throws MongoDbException {
     super( props, log );
     user = props.get( MongoProp.USER );
   }

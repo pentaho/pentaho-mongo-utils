@@ -193,7 +193,7 @@ public class KerberosUtil {
    * @throws LoginException Error encountered while logging in.
    */
   public static LoginContext loginAs( JaasAuthenticationMode authMode, String principal, String keytabFile )
-      throws LoginException {
+    throws LoginException {
     LoginContext lc;
     Subject subject;
     switch( authMode ) {
@@ -226,7 +226,7 @@ public class KerberosUtil {
    * @throws LoginException Error creating login context.
    */
   private static LoginContext createLoginContextWithKeytab( String principal, String keytabFile )
-      throws LoginException {
+    throws LoginException {
     if ( keytabFile == null ) {
       throw new IllegalArgumentException( "A keytab file is required to authenticate with Kerberos via keytab" );
     }
