@@ -9,6 +9,7 @@ import org.pentaho.mongo.MongoProperties;
 import org.pentaho.mongo.wrapper.MongoClientWrapper;
 import org.pentaho.mongo.wrapper.MongoClientWrapperFactory;
 import org.pentaho.mongo.wrapper.collection.MongoCollectionWrapper;
+import org.pentaho.mongo.wrapper.cursor.MongoCursorWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +63,35 @@ public class UserPassAuthTest extends TestBase {
     tempCollection = null;
   }
 
+  public void testCursor() throws MongoDbException {
+    clientWrapper = getWrapper();
+    tempCollection = "testCollection" + UUID.randomUUID().toString().replace( "-", "" );
+
+    clientWrapper.createCollection( db, tempCollection );
+    MongoCollectionWrapper collectionWrapper = clientWrapper.getCollection( db, tempCollection );
+
+    List<DBObject> dbObjects = new ArrayList<DBObject>();
+    for ( int i = 0; i < 100; i++ ) {
+      dbObjects.add( new BasicDBObject( "foo", "bar" + i ) );
+    }
+    collectionWrapper.insert( dbObjects );
+
+    MongoCursorWrapper cursor = collectionWrapper.find();
+
+    cursor = cursor.limit( 10 );
+
+    int i = 0;
+    while ( cursor.hasNext() ) {
+      assertEquals( "bar" + i, cursor.next().get( "foo" ) );
+      i++;
+    }
+    assertEquals( "Should be limited to 10 items", 10, i );
+
+    assertEquals( host, cursor.getServerAddress().getHost() );
+    assertEquals( Integer.parseInt( port ), cursor.getServerAddress().getPort() );
+  }
+
+
   private MongoClientWrapper getWrapper() throws MongoDbException {
     return MongoClientWrapperFactory.createMongoClientWrapper(
       new MongoProperties()
@@ -72,4 +102,6 @@ public class UserPassAuthTest extends TestBase {
         .set( MongoProp.DBNAME, db ),
       null );
   }
+
+
 }
