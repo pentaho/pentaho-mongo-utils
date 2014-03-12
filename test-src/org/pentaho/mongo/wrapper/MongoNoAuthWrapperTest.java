@@ -17,18 +17,18 @@
 
 package org.pentaho.mongo.wrapper;
 
-import com.mongodb.BasicDBList;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
+import com.mongodb.*;
 import com.mongodb.util.JSON;
 import org.junit.Test;
-import org.pentaho.mongo.MongoDbException;
+import org.pentaho.mongo.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class MongoNoAuthWrapperTest {
   protected static String s_testData = "{\"one\" : {\"three\" : [ {\"rec2\" : { \"f0\" : \"zzz\" } } ], "
@@ -54,6 +54,62 @@ public class MongoNoAuthWrapperTest {
   public static String TAG_SET = "{\"use\" : \"production\"}";
 
   private MongoClient client = null;
+
+
+  @Test
+  public void testGetTagSets() throws MongoDbException {
+    MongoProperties props = new MongoProperties();
+    props.set( MongoProp.TAG_SET, TAG_SET );
+    MongoClient client = mock( MongoClient.class );
+
+    NoAuthMongoClientWrapper wrapper = new NoAuthMongoClientWrapper( client, null );
+    assertEquals( JSON.parse( TAG_SET ), wrapper.getTagSets( props )[ 0 ] );
+    assertEquals( 1, wrapper.getTagSets( props ).length );
+
+    String tagSet2 = "{ \"disk\": \"ssd\", \"use\": \"reporting\" }";
+    props.set( MongoProp.TAG_SET, tagSet2 );
+    assertEquals( JSON.parse( tagSet2 ), wrapper.getTagSets( props )[ 0 ] );
+    assertEquals( 1, wrapper.getTagSets( props ).length );
+
+    String tagSet3 = "{ \"disk\": \"ssd\", \"use\": \"reporting\", \"rack\": \"a\" },"
+      + "{ \"disk\": \"ssd\", \"use\": \"reporting\", \"rack\": \"d\" },"
+      + "{ \"disk\": \"ssd\", \"use\": \"reporting\", \"mem\": \"r\"}";
+
+    props.set( MongoProp.TAG_SET, tagSet3 );
+    assertEquals( JSON.parse( "{ \"disk\": \"ssd\", \"use\": \"reporting\", \"rack\": \"a\" }" ),
+      wrapper.getTagSets( props )[ 0 ] );
+    assertEquals( 3, wrapper.getTagSets( props ).length );
+  }
+
+  @Test
+  public void testConfigureReadPref() {
+    MongoProperties props = new MongoProperties();
+    props.set( MongoProp.TAG_SET, TAG_SET );
+    MongoClient client = mock( MongoClient.class );
+    MongoClientOptions.Builder builder = MongoClientOptions.builder();
+    MongoUtilLogger logger = mock( MongoUtilLogger.class );
+    NoAuthMongoClientWrapper wrapper = new NoAuthMongoClientWrapper( client, logger );
+
+
+    // Verify PRIMARY with tag sets causes a warning
+    wrapper.configureReadPref( builder, props );
+    // should warn.  tag sets with a PRIMARY read pref are invalid.
+    verify( logger ).warn( BaseMessages.getString(
+      this.getClass(), "MongoNoAuthWrapper.Message.Warning.PrimaryReadPrefWithTagSets" ), null  );
+    // defaults to primary if unset
+    assertEquals( ReadPreference.primary(), builder.build().getReadPreference() );
+
+    // Verify options set correctly with SECONDARY and READ_PREFERENCE
+    builder = MongoClientOptions.builder();
+    props.set( MongoProp.READ_PREFERENCE, "SECONDARY" );
+    wrapper.configureReadPref( builder, props );
+    MongoClientOptions options = builder.build();
+    options.getReadPreference();
+    assertEquals( "secondary", options.getReadPreference().getName() );
+    assertTrue( options.getReadPreference() instanceof TaggableReadPreference );
+    assertEquals( JSON.parse( "[" + TAG_SET + "]" ),
+      ( (TaggableReadPreference) options.getReadPreference() ).getTagSets() );
+  }
 
   @Test
   public void testExtractLastErrorMode() throws MongoDbException {
@@ -105,94 +161,6 @@ public class MongoNoAuthWrapperTest {
     assertEquals( 2, satisfy.size() );
   }
 
-  /*
-  @Test
-  public void testDeterminePaths() {
-    Map<String, MongoField> fieldLookup = new HashMap<String, MongoField>();
-    List<MongoField> discoveredFields = new ArrayList<MongoField>();
 
-    Object mongoO = JSON.parse(s_testData);
-    assertTrue(mongoO instanceof DBObject);
-
-    NoAuthMongoClientWrapper.docToFields((DBObject) mongoO, fieldLookup);
-    NoAuthMongoClientWrapper.postProcessPaths(fieldLookup, discoveredFields, 1);
-
-    assertEquals(5, discoveredFields.size());
-
-    // check types
-    int stringCount = 0;
-    int numCount = 0;
-    for (MongoField m : discoveredFields) {
-      if (ValueMeta.getType(m.m_kettleType) == ValueMetaInterface.TYPE_STRING) {
-        stringCount++;
-      }
-
-      if (ValueMeta.getType(m.m_kettleType) == ValueMetaInterface.TYPE_INTEGER) {
-        numCount++;
-      }
-    }
-
-    assertEquals(1, numCount);
-    assertEquals(4, stringCount);
-  }
-
-  @Test
-  public void testDeterminePathsWithDisparateTypes() {
-    Map<String, MongoField> fieldLookup = new HashMap<String, MongoField>();
-    List<MongoField> discoveredFields = new ArrayList<MongoField>();
-
-    Object mongoO = JSON.parse(s_testData3);
-    assertTrue(mongoO instanceof DBObject);
-    NoAuthMongoClientWrapper.docToFields((DBObject) mongoO, fieldLookup);
-
-    mongoO = JSON.parse(s_testData4);
-    assertTrue(mongoO instanceof DBObject);
-    NoAuthMongoClientWrapper.docToFields((DBObject) mongoO, fieldLookup);
-
-    NoAuthMongoClientWrapper.postProcessPaths(fieldLookup, discoveredFields, 1);
-
-    assertEquals(9, discoveredFields.size());
-    Collections.sort(discoveredFields);
-
-    // First path is the "aNumber" field
-    assertTrue(discoveredFields.get(0).m_disparateTypes);
-  }
-
-
-  @Test
-  public void testGetAllFields() throws MongoDbException {
-
-    Map<String, MongoField> fieldLookup = new HashMap<String, MongoField>();
-    List<MongoField> discoveredFields = new ArrayList<MongoField>();
-
-    Object mongoO = JSON.parse(s_testData);
-    assertTrue(mongoO instanceof DBObject);
-
-    NoAuthMongoClientWrapper.docToFields((DBObject) mongoO, fieldLookup);
-    NoAuthMongoClientWrapper.postProcessPaths(fieldLookup, discoveredFields, 1);
-    Collections.sort( discoveredFields );
-
-    RowMetaInterface rowMeta = new RowMeta();
-    for (MongoField m : discoveredFields) {
-      ValueMetaInterface vm = new ValueMeta(m.m_fieldName,
-        ValueMeta.getType(m.m_kettleType));
-      rowMeta.addValueMeta(vm);
-    }
-
-    MongoDbInputData data = new MongoDbInputData();
-    data.outputRowMeta = rowMeta;
-    data.setMongoFields(discoveredFields);
-    data.init();
-    Variables vars = new Variables();
-    Object[] result = data.mongoDocumentToKettle((DBObject) mongoO, vars)[0];
-    assertTrue(result != null);
-    Object[] expected = { new Long(42), "zzz", "bob", "fred", "george" };
-
-    for (int i = 0; i < rowMeta.size(); i++) {
-      assertTrue(result[i] != null);
-      assertEquals(expected[i], result[i]);
-    }
-  }
-  */
 
 }
