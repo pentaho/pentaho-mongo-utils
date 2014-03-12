@@ -10,6 +10,7 @@ public class MongoProperties {
   public MongoProperties() {
     // defaults
     props.put( MongoProp.PASSWORD, "" );
+    props.put( MongoProp.READ_PREFERENCE, "PRIMARY" );
   }
 
   public MongoProperties set( MongoProp prop, String value ) {
