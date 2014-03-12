@@ -9,6 +9,7 @@ import com.mongodb.MongoClientOptions;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
 import com.mongodb.util.JSON;
+import com.mongodb.util.JSONParseException;
 import org.pentaho.mongo.BaseMessages;
 import org.pentaho.mongo.MongoDbException;
 import org.pentaho.mongo.MongoProp;
@@ -215,18 +216,20 @@ public class NoAuthMongoClientWrapper implements MongoClientWrapper {
     optsBuilder.writeConcern( concern );
   }
 
-  void configureReadPref( MongoClientOptions.Builder optsBuilder, MongoProperties props ) {
+  void configureReadPref( MongoClientOptions.Builder optsBuilder, MongoProperties props ) throws MongoDbException {
     String readPreference = props.get( MongoProp.READ_PREFERENCE );
     if ( Util.isEmpty( readPreference ) ) {
       // nothing to do
       return;
     }
-
-    logInfo( BaseMessages.getString( PKG, "MongoNoAuthWrapper.Message.UsingReadPreference",
-      Util.isEmpty( readPreference ) ? NamedReadPreference.PRIMARY.getName() : readPreference ) );
-
     DBObject[] tagSets = getTagSets( props );
     NamedReadPreference preference = NamedReadPreference.byName( readPreference );
+    if ( preference == null ) {
+      throw new MongoDbException(
+        BaseMessages.getString( PKG, "MongoNoAuthWrapper.ErrorMessage.ReadPreferenceNotFound", readPreference,
+           getPrettyListOfValidPreferences() ) );
+    }
+    logInfo( BaseMessages.getString( PKG, "MongoNoAuthWrapper.Message.UsingReadPreference", preference.getName() ) );
 
     if ( preference == NamedReadPreference.PRIMARY && tagSets.length > 0 ) {
       // Invalid combination.  Tag sets are not used with PRIMARY
@@ -246,11 +249,26 @@ public class NoAuthMongoClientWrapper implements MongoClientWrapper {
     }
   }
 
-  DBObject[] getTagSets( MongoProperties props ) {
+  private String getPrettyListOfValidPreferences() {
+    // [primary, primaryPreferred, secondary, secondaryPreferred, nearest]
+    return Arrays.toString( new ArrayList<String>( NamedReadPreference.getPreferenceNames() ).toArray() );
+  }
+
+  DBObject[] getTagSets( MongoProperties props ) throws MongoDbException {
     String tagSet = props.get( MongoProp.TAG_SET );
     if ( tagSet != null ) {
-      // TODO - add validation of starting tagSet and logging/error handling for invalid json
-      BasicDBList list = (BasicDBList) JSON.parse( "[" + tagSet + "]" );
+      BasicDBList list;
+      if ( !tagSet.trim().startsWith( "[" ) ) {
+        // wrap the set in an array
+        tagSet = "[" + tagSet + "]";
+      }
+      try {
+        list = (BasicDBList) JSON.parse( tagSet );
+      } catch ( JSONParseException parseException ) {
+        throw new MongoDbException(
+          BaseMessages.getString( PKG, "MongoNoAuthWrapper.ErrorMessage.UnableToParseTagSets", tagSet ),
+          parseException );
+      }
       return list.toArray( new DBObject[list.size()] );
     }
     return new DBObject[0];
