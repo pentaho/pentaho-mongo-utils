@@ -35,7 +35,8 @@ public class KerberosInvocationHandlerTest {
   public void testInvocationHandlerCallsDoAsWhichCallsDelegate() throws MongoDbException, PrivilegedActionException {
     final MongoClientWrapper wrapper = mock( MongoClientWrapper.class );
     AuthContext authContext = mock( AuthContext.class );
-    MongoClientWrapper wrappedWrapper = KerberosInvocationHandler.wrap( MongoClientWrapper.class, authContext, wrapper );
+    MongoClientWrapper wrappedWrapper =
+      KerberosInvocationHandler.wrap( MongoClientWrapper.class, authContext, wrapper );
     when( authContext.doAs( any( PrivilegedExceptionAction.class ) ) ).thenAnswer( new Answer<Void>() {
 
       @Override
