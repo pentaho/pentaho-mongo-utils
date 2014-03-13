@@ -10,8 +10,7 @@ import static org.pentaho.mongo.MongoProp.*;
 public class MongoPropertiesTest {
   @Test
   public void testBuildsMongoClientOptions() throws Exception {
-    MongoProperties props = new MongoProperties();
-    props
+    MongoProperties props = new MongoProperties.Builder()
       .set(connectionsPerHost, "127" )
       .set(connectTimeout, "333" )
       .set( maxAutoConnectRetryTime, "3000" )
@@ -20,7 +19,8 @@ public class MongoPropertiesTest {
       .set( autoConnectRetry, "true" )
       .set( cursorFinalizerEnabled, "false" )
       .set( socketKeepAlive, "true" )
-      .set( socketTimeout, "4" );
+      .set( socketTimeout, "4" )
+      .build();
     MongoUtilLogger log = Mockito.mock( MongoUtilLogger.class );
     MongoClientOptions options = props.buildMongoClientOptions( log );
     assertEquals( 127, options.getConnectionsPerHost() );
@@ -36,7 +36,7 @@ public class MongoPropertiesTest {
 
   @Test
   public void testBuildsMongoClientOptionsDefaults() throws Exception {
-    MongoProperties props = new MongoProperties();
+    MongoProperties props = new MongoProperties.Builder().build();
     MongoUtilLogger log = Mockito.mock( MongoUtilLogger.class );
     MongoClientOptions options = props.buildMongoClientOptions( log );
     assertEquals( 100, options.getConnectionsPerHost() );
