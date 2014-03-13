@@ -97,12 +97,13 @@ public class UserPassAuthTest extends TestBase {
 
   private MongoClientWrapper getWrapper() throws MongoDbException {
     return MongoClientWrapperFactory.createMongoClientWrapper(
-      new MongoProperties()
+      new MongoProperties.Builder()
         .set( MongoProp.HOST, host )
         .set( MongoProp.PORT, port )
-        .set( MongoProp.USER, user )
+        .set( MongoProp.USERNAME, user )
         .set( MongoProp.PASSWORD, password )
-        .set( MongoProp.DBNAME, db ),
+        .set( MongoProp.DBNAME, db )
+        .build(),
       null );
   }
 
