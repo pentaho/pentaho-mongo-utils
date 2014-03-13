@@ -18,7 +18,8 @@ MongoClientWrapper mongo = MongoClientWrapperFactory.createMongoClientWrapper(
         .set( MongoProp.PASSWORD, "password" )
         .set( MongoProp.DBNAME, "databaseName" ),
       null );
-MongoCollectionWrapper collection  = mongo.getCollection( "databaseName", "collectionName" );
+MongoCollectionWrapper collection  = 
+    mongo.getCollection( "databaseName", "collectionName" );
 MongoCursorWrapper cursor = collection.find();
       
 ````
@@ -28,9 +29,9 @@ MongoProperties
 
 For the most part, the expected values of MongoProperties are consistent with their corresponding properties in the MongoClientUri specification (http://api.mongodb.org/java/2.12/com/mongodb/MongoClientURI.html).  Some exceptions include:
 
-*JOURNALED:  a true|false property indicating how WriteConcern should be configured
-*KERBEROS:  a true|false property indicating whether the GSSAPI auth mechanism should be used
-*TAG_SET:  A comma seperated, ordered list of JSON docs defining the tag sets to be used for configuring readPreference.  For example:  { "disk": "ssd", "use": "reporting", "rack": "a" },{ "disk": "ssd", "use": "reporting", "rack": "d" }
+* JOURNALED:  a true|false property indicating how WriteConcern should be configured
+* KERBEROS:  a true|false property indicating whether the GSSAPI auth mechanism should be used
+* TAG_SET:  A comma seperated, ordered list of JSON docs defining the tag sets to be used for configuring readPreference.  For example:  { "disk": "ssd", "use": "reporting", "rack": "a" },{ "disk": "ssd", "use": "reporting", "rack": "d" }
 
 See org.pentaho.mongo.MongoProp for the full set of configuration properties.
 
