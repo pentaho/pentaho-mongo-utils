@@ -16,7 +16,7 @@ public class MongoClientWrapperFactory {
       return (MongoClientWrapper) Proxy.newProxyInstance( wrapper.getClass().getClassLoader(),
         new Class<?>[] { MongoClientWrapper.class },
         new KerberosInvocationHandler( wrapper.getAuthContext(), wrapper ) );
-    } else if ( !Util.isEmpty( props.get( MongoProp.USER ) ) || !Util.isEmpty( props.get( MongoProp.PASSWORD ) ) ) {
+    } else if ( !Util.isEmpty( props.get( MongoProp.USERNAME ) ) || !Util.isEmpty( props.get( MongoProp.PASSWORD ) ) ) {
       return new UsernamePasswordMongoClientWrapper( props, log );
     } else {
       return new NoAuthMongoClientWrapper( props, log );

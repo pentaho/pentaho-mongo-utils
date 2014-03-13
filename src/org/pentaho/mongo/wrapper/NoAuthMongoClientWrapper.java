@@ -7,22 +7,17 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.ServerAddress;
-import com.mongodb.WriteConcern;
-import com.mongodb.util.JSON;
-import com.mongodb.util.JSONParseException;
 import org.pentaho.mongo.BaseMessages;
 import org.pentaho.mongo.MongoDbException;
 import org.pentaho.mongo.MongoProp;
 import org.pentaho.mongo.MongoProperties;
 import org.pentaho.mongo.MongoUtilLogger;
-import org.pentaho.mongo.NamedReadPreference;
 import org.pentaho.mongo.Util;
 import org.pentaho.mongo.wrapper.collection.DefaultMongoCollectionWrapper;
 import org.pentaho.mongo.wrapper.collection.MongoCollectionWrapper;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -112,11 +107,7 @@ public class NoAuthMongoClientWrapper implements MongoClientWrapper {
       }
     }
 
-    MongoClientOptions.Builder mongoOptsBuilder = new MongoClientOptions.Builder();
-
-    configureConnectionOptions( mongoOptsBuilder, props, log );
-
-    MongoClientOptions opts = mongoOptsBuilder.build();
+    MongoClientOptions opts = props.buildMongoClientOptions( log );
     return getClient( props, log, repSet, useAllReplicaSetMembers, opts );
   }
 
@@ -139,164 +130,6 @@ public class NoAuthMongoClientWrapper implements MongoClientWrapper {
       throw new MongoDbException( u );
     }
   }
-
-  /**
-   * Utility method to configure Mongo connection options
-   * @param optsBuilder    an options builder
-   * @param props          properties to use
-   * @param log            for logging
-   * @throws MongoDbException if a problem occurs
-   */
-  private void configureConnectionOptions( MongoClientOptions.Builder optsBuilder,
-                                           MongoProperties props, MongoUtilLogger log )
-
-    throws MongoDbException {
-
-
-    // connection timeout
-    int connTimeout = intValue( props.get( MongoProp.CONNECT_TIMEOUT ), 0 );
-    if ( connTimeout > 0 ) {
-      optsBuilder.connectTimeout( connTimeout );
-    }
-
-    // socket timeout
-    int socketTimeout = intValue( props.get( MongoProp.SOCKET_TIMEOUT ), 0 );
-    if ( connTimeout > 0 ) {
-      optsBuilder.socketTimeout( socketTimeout );
-    }
-
-    configureReadPref( optsBuilder, props );
-
-    // write concern
-    String writeConcern = props.get( MongoProp.WRITE_CONCERN );
-    String wTimeout = props.get( MongoProp.WRITE_TIMEOUT );
-    boolean journaled = Boolean.valueOf( props.get( MongoProp.JOURNALED ) );
-
-    WriteConcern concern;
-
-    if ( !Util.isEmpty( writeConcern ) && Util.isEmpty( wTimeout ) && !journaled ) {
-      // all defaults - timeout 0, journal = false, w = 1
-      concern = new WriteConcern();
-      concern.setWObject( 1 );
-
-      if ( log != null ) {
-        log.info( BaseMessages
-          .getString( PKG, "MongoNoAuthWrapper.Message.ConfiguringWithDefaultWriteConcern" ) ); //$NON-NLS-1$
-      }
-    } else {
-      int wt = 0;
-      if ( !Util.isEmpty( wTimeout ) ) {
-        try {
-          wt = Integer.parseInt( wTimeout );
-        } catch ( NumberFormatException n ) {
-          throw new MongoDbException( n );
-        }
-      }
-
-      if ( !Util.isEmpty( writeConcern ) ) {
-        // try parsing as a number first
-        try {
-          int wc = Integer.parseInt( writeConcern );
-          concern = new WriteConcern( wc, wt, false, journaled );
-        } catch ( NumberFormatException n ) {
-          // assume its a valid string - e.g. "majority" or a custom
-          // getLastError label associated with a tag set
-          concern = new WriteConcern( writeConcern, wt, false, journaled );
-        }
-      } else {
-        concern = new WriteConcern( 1, wt, false, journaled );
-      }
-
-      if ( log != null ) {
-        String lwc =
-          "w = " + concern.getW() + ", wTimeout = " + concern.getWtimeout() + ", journaled = " + concern.getJ();
-        log.info( BaseMessages.getString( PKG, "MongoNoAuthWrapper.Message.ConfiguringWithWriteConcern", lwc ) );
-      }
-    }
-    optsBuilder.writeConcern( concern );
-  }
-
-  void configureReadPref( MongoClientOptions.Builder optsBuilder, MongoProperties props ) throws MongoDbException {
-    String readPreference = props.get( MongoProp.READ_PREFERENCE );
-    if ( Util.isEmpty( readPreference ) ) {
-      // nothing to do
-      return;
-    }
-    DBObject[] tagSets = getTagSets( props );
-    NamedReadPreference preference = NamedReadPreference.byName( readPreference );
-    if ( preference == null ) {
-      throw new MongoDbException(
-        BaseMessages.getString( PKG, "MongoNoAuthWrapper.ErrorMessage.ReadPreferenceNotFound", readPreference,
-           getPrettyListOfValidPreferences() ) );
-    }
-    logInfo( BaseMessages.getString( PKG, "MongoNoAuthWrapper.Message.UsingReadPreference", preference.getName() ) );
-
-    if ( preference == NamedReadPreference.PRIMARY && tagSets.length > 0 ) {
-      // Invalid combination.  Tag sets are not used with PRIMARY
-      logWarn( BaseMessages.getString(
-        this.getClass(), "MongoNoAuthWrapper.Message.Warning.PrimaryReadPrefWithTagSets" ) );
-      optsBuilder.readPreference( preference.getPreference() );
-    } else if ( tagSets.length > 0 ) {
-      logInfo(
-        BaseMessages.getString(
-          PKG, "MongoNoAuthWrapper.Message.UsingReadPreferenceTagSets",
-          Arrays.toString( tagSets ) ) );
-      DBObject[] remainder = tagSets.length > 1 ? Arrays.copyOfRange( tagSets, 1, tagSets.length ) : new DBObject[ 0 ];
-      optsBuilder.readPreference( preference.getTaggableReadPreference( tagSets[0], remainder ) );
-    } else {
-      logInfo( BaseMessages.getString( PKG, "MongoNoAuthWrapper.Message.NoReadPreferenceTagSetsDefined" ) );
-      optsBuilder.readPreference( preference.getPreference() );
-    }
-  }
-
-  private String getPrettyListOfValidPreferences() {
-    // [primary, primaryPreferred, secondary, secondaryPreferred, nearest]
-    return Arrays.toString( new ArrayList<String>( NamedReadPreference.getPreferenceNames() ).toArray() );
-  }
-
-  DBObject[] getTagSets( MongoProperties props ) throws MongoDbException {
-    String tagSet = props.get( MongoProp.TAG_SET );
-    if ( tagSet != null ) {
-      BasicDBList list;
-      if ( !tagSet.trim().startsWith( "[" ) ) {
-        // wrap the set in an array
-        tagSet = "[" + tagSet + "]";
-      }
-      try {
-        list = (BasicDBList) JSON.parse( tagSet );
-      } catch ( JSONParseException parseException ) {
-        throw new MongoDbException(
-          BaseMessages.getString( PKG, "MongoNoAuthWrapper.ErrorMessage.UnableToParseTagSets", tagSet ),
-          parseException );
-      }
-      return list.toArray( new DBObject[list.size()] );
-    }
-    return new DBObject[0];
-  }
-
-  private void logInfo( String message ) {
-    if ( log != null ) {
-      log.info( message );
-    }
-  }
-
-  private void logWarn( String message ) {
-    if ( log != null ) {
-      log.warn( message, null );
-    }
-  }
-
-  private int intValue( String value, int defaultVal ) throws MongoDbException {
-    if ( !Util.isEmpty( value ) ) {
-      try {
-        return Integer.parseInt( value );
-      } catch ( NumberFormatException n ) {
-        throw new MongoDbException( n );
-      }
-    }
-    return defaultVal;
-  }
-
 
   /**
    * Retrieve all database names found in MongoDB as visible by the authenticated user.

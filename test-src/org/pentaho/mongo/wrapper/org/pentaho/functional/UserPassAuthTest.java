@@ -100,7 +100,7 @@ public class UserPassAuthTest extends TestBase {
       new MongoProperties()
         .set( MongoProp.HOST, host )
         .set( MongoProp.PORT, port )
-        .set( MongoProp.USER, user )
+        .set( MongoProp.USERNAME, user )
         .set( MongoProp.PASSWORD, password )
         .set( MongoProp.DBNAME, db ),
       null );

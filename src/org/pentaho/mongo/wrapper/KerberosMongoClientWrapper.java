@@ -48,7 +48,7 @@ public class KerberosMongoClientWrapper extends UsernamePasswordMongoClientWrapp
   @Override
   protected MongoCredential getCredential( MongoProperties props ) {
     return MongoCredential.createGSSAPICredential(
-      props.get( MongoProp.USER ) );
+      props.get( MongoProp.USERNAME ) );
   }
 
   @Override

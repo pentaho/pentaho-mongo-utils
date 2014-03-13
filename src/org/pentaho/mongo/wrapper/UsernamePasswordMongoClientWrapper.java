@@ -28,7 +28,7 @@ public class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper
   public UsernamePasswordMongoClientWrapper( MongoProperties props, MongoUtilLogger log )
     throws MongoDbException {
     super( props, log );
-    user = props.get( MongoProp.USER );
+    user = props.get( MongoProp.USERNAME );
   }
 
   public UsernamePasswordMongoClientWrapper( MongoClient mongo, MongoUtilLogger log, String user,
@@ -64,7 +64,7 @@ public class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper
    */
   protected MongoCredential getCredential( MongoProperties props ) {
     return MongoCredential.createMongoCRCredential(
-      props.get( MongoProp.USER ),
+      props.get( MongoProp.USERNAME ),
       props.get( MongoProp.DBNAME ),
       props.get( MongoProp.PASSWORD ).toCharArray() );
   }
