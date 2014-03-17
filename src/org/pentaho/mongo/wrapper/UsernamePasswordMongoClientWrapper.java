@@ -1,21 +1,36 @@
+/*!
+  * Copyright 2010 - 2014 Pentaho Corporation.  All rights reserved.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+  *
+  * http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  *
+  */
 package org.pentaho.mongo.wrapper;
 
 import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
 import org.pentaho.mongo.MongoDbException;
 import org.pentaho.mongo.MongoProp;
 import org.pentaho.mongo.MongoProperties;
 import org.pentaho.mongo.MongoUtilLogger;
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper {
-  static Class<?> PKG = UsernamePasswordMongoClientWrapper.class;
-
+/**
+ * Implementation of MongoClientWrapper which uses no credentials.
+ * Should only be instantiated by MongoClientWrapperFactory.
+ */
+class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper {
   private final String user;
 
   /**
@@ -25,15 +40,15 @@ public class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper
    * @param log   for logging
    * @throws MongoDbException if a problem occurs
    */
-  public UsernamePasswordMongoClientWrapper( MongoProperties props, MongoUtilLogger log )
+  UsernamePasswordMongoClientWrapper( MongoProperties props, MongoUtilLogger log )
     throws MongoDbException {
     super( props, log );
     user = props.get( MongoProp.USERNAME );
   }
 
-  public UsernamePasswordMongoClientWrapper( MongoClient mongo, MongoUtilLogger log, String user,
-                                             String password ) {
+  UsernamePasswordMongoClientWrapper( MongoClient mongo, MongoUtilLogger log, String user ) {
     super( mongo, log );
+    props = null;
     this.user = user;
   }
 
@@ -41,31 +56,18 @@ public class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper
     return user;
   }
 
-  @Override
-  protected MongoClient getClient( MongoProperties props, MongoUtilLogger log,
-                                   List<ServerAddress> repSet, boolean useAllReplicaSetMembers,
-                                   MongoClientOptions opts ) throws MongoDbException {
-    try {
-      List<MongoCredential> credList = new ArrayList<MongoCredential>();
-      credList.add( getCredential( props ) );
-      return ( repSet.size() > 1 || ( useAllReplicaSetMembers && repSet.size() >= 1 ) ? new MongoClient( repSet,
-        credList, opts ) : ( repSet.size() == 1 ? new MongoClient( repSet.get( 0 ), credList, opts )
-        : new MongoClient( new ServerAddress( "localhost" ), credList, opts ) ) ); //$NON-NLS-1$
-    } catch ( UnknownHostException u ) {
-      throw new MongoDbException( u );
-    }
-  }
-
   /**
    * Create a credentials object
    *
-   * @param props properties to use
    * @return a configured MongoCredential object
    */
-  protected MongoCredential getCredential( MongoProperties props ) {
-    return MongoCredential.createMongoCRCredential(
+  @Override
+  public List<MongoCredential> getCredentialList() {
+    List<MongoCredential> credList = new ArrayList<MongoCredential>();
+    credList.add( MongoCredential.createMongoCRCredential(
       props.get( MongoProp.USERNAME ),
       props.get( MongoProp.DBNAME ),
-      props.get( MongoProp.PASSWORD ).toCharArray() );
+      props.get( MongoProp.PASSWORD ).toCharArray() ) );
+    return credList;
   }
 }

@@ -43,6 +43,14 @@ public class MongoProperties {
     return builder.build();
   }
 
+  public boolean useKerberos() {
+    return Boolean.parseBoolean( props.get( MongoProp.USE_KERBEROS ) );
+  }
+
+  public boolean useAllReplicaSetMembers() {
+    return Boolean.valueOf( props.get( MongoProp.USE_ALL_REPLICA_SET_MEMBERS ) );
+  }
+
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
@@ -54,11 +62,15 @@ public class MongoProperties {
   }
 
   public static class Builder {
+    private static final String DEFAULT_HOST = "localhost";
+    private static final String DEFAULT_READ_PREFERENCE = "primary";
+
     private final Map<MongoProp, String> props = new HashMap<MongoProp, String>();
 
     public Builder() {
       props.put( MongoProp.PASSWORD, "" );
-      props.put( MongoProp.readPreference, "PRIMARY" );
+      props.put( MongoProp.HOST, DEFAULT_HOST );
+      props.put( MongoProp.readPreference, DEFAULT_READ_PREFERENCE );
     }
 
     public Builder set( MongoProp prop, String value ) {

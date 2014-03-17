@@ -29,7 +29,7 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 import com.sun.security.auth.module.Krb5LoginModule;
-import org.pentaho.mongo.wrapper.KerberosMongoClientWrapper;
+import org.pentaho.mongo.wrapper.MongoClientWrapper;
 
 /**
  * A collection of utilities for working with Kerberos.
@@ -164,7 +164,7 @@ public class KerberosUtil {
         }
       }
       throw new MongoDbException( BaseMessages.getString(
-        KerberosMongoClientWrapper.class,
+        MongoClientWrapper.class,
         "MongoKerberosWrapper.Message.Error.JaasAuthModeIncorrect",
         Arrays.toString( JaasAuthenticationMode.values() ),
         "'" + modeName + "'" ) );
