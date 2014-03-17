@@ -1,53 +1,29 @@
+/*!
+ * Copyright 2010 - 2014 Pentaho Corporation.  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 package org.pentaho.mongo;
 
-
+/**
+ * Static utility methods.
+ */
 public class Util {
 
   public static boolean isEmpty( String s ) {
     return s == null || s.isEmpty();
-  }
-
-  /**
-   * Cleanses a string path by ensuring that any variables names present in the path do not contain "."s (replaces any
-   * dots with underscores).
-   *
-   * @param path
-   *          the path to cleanse
-   * @return the cleansed path
-   */
-  public static String cleansePath( String path ) {
-    // look for variables and convert any "." to "_"
-
-    int index = path.indexOf( "${" ); //$NON-NLS-1$
-
-    int endIndex = 0;
-    String tempStr = path;
-    while ( index >= 0 ) {
-      index += 2;
-      endIndex += tempStr.indexOf( "}" ); //$NON-NLS-1$
-      if ( endIndex > 0 && endIndex > index + 1 ) {
-        String key = path.substring( index, endIndex );
-
-        String cleanKey = key.replace( '.', '_' );
-        path = path.replace( key, cleanKey );
-      } else {
-        break;
-      }
-
-      if ( endIndex + 1 < path.length() ) {
-        tempStr = path.substring( endIndex + 1, path.length() );
-      } else {
-        break;
-      }
-
-      index = tempStr.indexOf( "${" ); //$NON-NLS-1$
-
-      if ( index > 0 ) {
-        index += endIndex;
-      }
-    }
-
-    return path;
   }
 
 }

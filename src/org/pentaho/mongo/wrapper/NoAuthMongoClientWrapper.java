@@ -1,3 +1,20 @@
+/*!
+* Copyright 2010 - 2014 Pentaho Corporation.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
+
 package org.pentaho.mongo.wrapper;
 
 import com.mongodb.BasicDBList;
@@ -6,6 +23,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import org.pentaho.mongo.BaseMessages;
 import org.pentaho.mongo.MongoDbException;
@@ -22,7 +40,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class NoAuthMongoClientWrapper implements MongoClientWrapper {
+/**
+ * Implementation of MongoClientWrapper which uses the MONGO-CR auth mechanism.
+ * Should only be instantiated by MongoClientWrapperFactory.
+ */
+class NoAuthMongoClientWrapper implements MongoClientWrapper {
   private static Class<?> PKG = NoAuthMongoClientWrapper.class;
   public static final int MONGO_DEFAULT_PORT = 27017;
 
@@ -35,6 +57,8 @@ public class NoAuthMongoClientWrapper implements MongoClientWrapper {
   private final MongoClient mongo;
   private final MongoUtilLogger log;
 
+  protected MongoProperties props;
+
   /**
    * Create a connection to a Mongo server based on parameters supplied in the step meta data
    *
@@ -42,10 +66,11 @@ public class NoAuthMongoClientWrapper implements MongoClientWrapper {
    * @param log   for logging
    * @throws MongoDbException if a problem occurs
    */
-  public NoAuthMongoClientWrapper( MongoProperties props, MongoUtilLogger log )
+  NoAuthMongoClientWrapper( MongoProperties props, MongoUtilLogger log )
     throws MongoDbException {
     this.log = log;
-    mongo = initConnection( props, log );
+    this.props = props;
+    mongo = getClient( props.buildMongoClientOptions( log ) );
   }
 
   public NoAuthMongoClientWrapper( MongoClient mongo, MongoUtilLogger log ) {
@@ -53,16 +78,14 @@ public class NoAuthMongoClientWrapper implements MongoClientWrapper {
     this.log = log;
   }
 
-  public MongoClient getMongo() {
+  MongoClient getMongo() {
     return mongo;
   }
 
-  private MongoClient initConnection( MongoProperties props, MongoUtilLogger log )
-    throws MongoDbException {
+  private List<ServerAddress> getServerAddressList() throws MongoDbException {
     String hostsPorts = props.get( MongoProp.HOST );
     String singlePort = props.get( MongoProp.PORT );
 
-    boolean useAllReplicaSetMembers = Boolean.valueOf( props.get( MongoProp.USE_ALL_REPLICA_SET_MEMBERS ) );
     int singlePortI = -1;
 
     try {
@@ -76,7 +99,7 @@ public class NoAuthMongoClientWrapper implements MongoClientWrapper {
         BaseMessages.getString( PKG, "MongoNoAuthWrapper.Message.Error.EmptyHostsString" ) ); //$NON-NLS-1$
     }
 
-    List<ServerAddress> repSet = new ArrayList<ServerAddress>();
+    List<ServerAddress> serverList = new ArrayList<ServerAddress>();
 
     String[] parts = hostsPorts.trim().split( "," ); //$NON-NLS-1$
     for ( String part : parts ) {
@@ -101,35 +124,43 @@ public class NoAuthMongoClientWrapper implements MongoClientWrapper {
 
       try {
         ServerAddress s = new ServerAddress( host, port );
-        repSet.add( s );
+        serverList.add( s );
       } catch ( UnknownHostException u ) {
         throw new MongoDbException( u );
       }
     }
-
-    MongoClientOptions opts = props.buildMongoClientOptions( log );
-    return getClient( props, log, repSet, useAllReplicaSetMembers, opts );
+    return serverList;
   }
 
-  protected MongoClient getClient( MongoProperties props, MongoUtilLogger log,
-                                   List<ServerAddress> repSet, boolean useAllReplicaSetMembers,
-                                   MongoClientOptions opts ) throws MongoDbException {
-    try {
-      // Mongo's java driver will discover all replica set or shard
-      // members (Mongos) automatically when MongoClient is constructed
-      // using a list of ServerAddresses. The javadocs state that MongoClient
-      // should be constructed using a SingleServer address instance (rather
-      // than a list) when connecting to a stand-alone host - this is why
-      // we differentiate here between a list containing one ServerAddress
-      // and a single ServerAddress instance via the useAllReplicaSetMembers
-      // flag.
-      return ( repSet.size() > 1 || ( useAllReplicaSetMembers && repSet.size() >= 1 ) ? new MongoClient( repSet, opts )
-        : ( repSet.size() == 1 ? new MongoClient( repSet.get( 0 ), opts ) : new MongoClient( new ServerAddress(
-          "localhost" ), opts ) ) ); //$NON-NLS-1$
-    } catch ( UnknownHostException u ) {
-      throw new MongoDbException( u );
+
+  protected MongoClient getClient( MongoClientOptions opts ) throws MongoDbException {
+    List<MongoCredential> credList = getCredentialList();
+    List<ServerAddress> serverAddressList = getServerAddressList();
+
+    if ( serverAddressList.size() == 0 ) {
+      // There should be minimally one server defined.  Default is localhost, so
+      // this can only happen if it's been explicitly set to NULL.
+      throw new MongoDbException(
+        BaseMessages.getString(
+          MongoClientWrapper.class,
+          "MongoNoAuthWrapper.Message.Error.NoHostSet" ) );
+    }
+    // Mongo's java driver will discover all replica set or shard
+    // members (Mongos) automatically when MongoClient is constructed
+    // using a list of ServerAddresses. The javadocs state that MongoClient
+    // should be constructed using a SingleServer address instance (rather
+    // than a list) when connecting to a stand-alone host - this is why
+    // we differentiate here between a list containing one ServerAddress
+    // and a single ServerAddress instance via the useAllReplicaSetMembers
+    // flag.
+    if ( props.useAllReplicaSetMembers() || serverAddressList.size() > 1 ) {
+      return new MongoClient( serverAddressList, credList, opts );
+    } else {
+      return new MongoClient( serverAddressList.get( 0 ), credList, opts );
     }
   }
+
+
 
   /**
    * Retrieve all database names found in MongoDB as visible by the authenticated user.
@@ -452,6 +483,13 @@ public class NoAuthMongoClientWrapper implements MongoClientWrapper {
   @Override
   public MongoCollectionWrapper createCollection( String db, String name ) throws MongoDbException {
     return wrap( getDb( db ).createCollection( name, null ) );
+  }
+
+
+  @Override
+  public List<MongoCredential> getCredentialList() {
+    // empty cred list
+    return new ArrayList<MongoCredential>();
   }
 
   protected MongoCollectionWrapper wrap( DBCollection collection ) {

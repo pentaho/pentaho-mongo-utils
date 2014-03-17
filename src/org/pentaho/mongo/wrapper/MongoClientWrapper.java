@@ -1,12 +1,37 @@
+/*!
+* Copyright 2010 - 2014 Pentaho Corporation.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
+
 package org.pentaho.mongo.wrapper;
 
 import com.mongodb.DBObject;
+import com.mongodb.MongoCredential;
 import org.pentaho.mongo.MongoDbException;
 import org.pentaho.mongo.wrapper.collection.MongoCollectionWrapper;
 
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Defines the wrapper interface for all interactions with a MongoClient.
+ * This interface for the most part passes on method calls to the underlying
+ * MongoClient implementations, but run in the desired AuthContext.
+ * This interface also includes some convenience methods (e.g. getAllTags(),
+ * getLastErrorModes()) which are not present in MongoClient.
+ */
 public interface MongoClientWrapper {
   public Set<String> getCollectionsNames( String dB ) throws MongoDbException;
 
@@ -52,9 +77,32 @@ public interface MongoClientWrapper {
    */
   public List<String> getLastErrorModes() throws MongoDbException;
 
+  /**
+   * Gets the list of credentials that this client authenticates all connections with.
+   */
+  public List<MongoCredential> getCredentialList();
+
+  /**
+   * Creates a new collection using the specified db and name
+   * @param db The database name
+   * @param name The new collection name
+   * @return a MongoCollectionWrapper which wraps the DBCollection object.
+   * @throws MongoDbException
+   */
   public MongoCollectionWrapper createCollection( String db, String name ) throws MongoDbException;
 
+  /**
+   * Gets a collection with a given name. If the collection does not exist, a new collection is created.
+   * @param db database name
+   * @param name  collection name
+   * @return a MongoCollectionWrapper which wraps the DBCollection object
+   * @throws MongoDbException
+   */
   public MongoCollectionWrapper getCollection( String db, String name ) throws MongoDbException;
 
+  /**
+   * Calls the close() method on the underling MongoClient.
+   * @throws MongoDbException
+   */
   public void dispose() throws MongoDbException;
 }
