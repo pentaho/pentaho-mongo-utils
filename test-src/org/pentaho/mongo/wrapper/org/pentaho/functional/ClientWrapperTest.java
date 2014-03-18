@@ -68,11 +68,8 @@ public class ClientWrapperTest extends TestBase {
         .set( DBNAME, (String) testProperties.get( "userpass.auth.db" ) )
         .set( connectionsPerHost, "100" )
         .set( connectTimeout, "10000" )
-        .set( maxAutoConnectRetryTime, "1000" )
         .set( maxWaitTime, "12000" )
         .set( readPreference, "primary" )
-        .set( alwaysUseMBeans, "false" )
-        .set( autoConnectRetry, "false" )
         .set( cursorFinalizerEnabled, "true" )
         .set( socketKeepAlive, "false" )
         .set( socketTimeout, "0" ).build() } } );
