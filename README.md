@@ -11,12 +11,12 @@ Create new MongoClientWrappers via the factory method below, passing in the prop
 
 ````java
 MongoClientWrapper mongo = MongoClientWrapperFactory.createMongoClientWrapper(
-      new MongoProperties()
+      new MongoProperties.Builder()
         .set( MongoProp.HOST, "localhost" )
         .set( MongoProp.PORT, "27017" )
         .set( MongoProp.USER, "user" )
         .set( MongoProp.PASSWORD, "password" )
-        .set( MongoProp.DBNAME, "databaseName" ),
+        .set( MongoProp.DBNAME, "databaseName" ).build(),
       null );
 MongoCollectionWrapper collection  = 
     mongo.getCollection( "databaseName", "collectionName" );
