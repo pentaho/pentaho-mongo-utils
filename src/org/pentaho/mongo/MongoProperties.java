@@ -22,6 +22,12 @@ import com.mongodb.MongoClientOptions;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A container for all properties associated with a MongoClientWrapper, including
+ * properties for handling credentials, server lists, and MongoClientOptions.
+ * MongoProperties objects are immutable and constructed via a
+ * MongoProperties.Builder.
+ */
 public class MongoProperties {
 
   private final Map<MongoProp, String> props;
@@ -30,10 +36,20 @@ public class MongoProperties {
     this.props = props;
   }
 
+  /**
+   * @return the value associated with prop, or null if unset.
+   */
   public String get( MongoProp prop ) {
     return props.get( prop );
   }
 
+  /**
+   * Constructs MongoClientOptions from the relevant set of properties.
+   * See the descriptions of each property in {@link MongoProp}
+   * @param log
+   * @return
+   * @throws MongoDbException
+   */
   public MongoClientOptions buildMongoClientOptions( MongoUtilLogger log ) throws MongoDbException {
     MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
     MongoPropToOption propToOption = new MongoPropToOption( log );
@@ -43,10 +59,16 @@ public class MongoProperties {
     return builder.build();
   }
 
+  /**
+   * Convenience method to determine the boolean property USE_KERBEROS.
+   */
   public boolean useKerberos() {
     return Boolean.parseBoolean( props.get( MongoProp.USE_KERBEROS ) );
   }
 
+  /**
+   * Convenience method to determine the boolean property USE_ALL_REPLICA_SET_MEMBERS.
+   */
   public boolean useAllReplicaSetMembers() {
     return Boolean.valueOf( props.get( MongoProp.USE_ALL_REPLICA_SET_MEMBERS ) );
   }
@@ -61,12 +83,18 @@ public class MongoProperties {
     return builder.toString();
   }
 
+  /**
+   * Used for constructing MongoProperties.
+   */
   public static class Builder {
     private static final String DEFAULT_HOST = "localhost";
     private static final String DEFAULT_READ_PREFERENCE = "primary";
 
     private final Map<MongoProp, String> props = new HashMap<MongoProp, String>();
 
+    /**
+     * Initializes any default values.
+     */
     public Builder() {
       props.put( MongoProp.PASSWORD, "" );
       props.put( MongoProp.HOST, DEFAULT_HOST );

@@ -19,6 +19,7 @@ package org.pentaho.mongo.wrapper.org.pentaho.functional;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -35,17 +36,31 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.pentaho.mongo.MongoProp.*;
 
 @RunWith( value = Parameterized.class )
 public class ClientWrapperTest extends TestBase {
 
   private final MongoProperties props;
-
+  private final List<String> tempCollections = new ArrayList<String>();
+  private MongoClientWrapper clientWrapper;
   public ClientWrapperTest( MongoProperties props ) {
     this.props = props;
+  }
+
+  @After
+  public void runAfter() throws MongoDbException {
+    if ( clientWrapper == null ) {
+      clientWrapper = getWrapper( props );
+    }
+    for ( String tempCollection : tempCollections ) {
+      // fail safe drop of tempCollection
+      clientWrapper.getCollection( props.get( DBNAME ), tempCollection ).drop();
+    }
+    tempCollections.clear();
+
   }
 
   /**
@@ -55,31 +70,55 @@ public class ClientWrapperTest extends TestBase {
   @Parameterized.Parameters
   public static Collection<MongoProperties[]> data() {
     return Arrays.asList(new MongoProperties[][] {
-      { new MongoProperties.Builder()
-        .set( HOST, (String) testProperties.get( "userpass.auth.host" ) )
-        .set( PORT, (String) testProperties.get( "userpass.auth.port" ) )
-        .set( USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
-        .set( PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
-        .set( DBNAME, (String) testProperties.get( "userpass.auth.db" ) ).build() },
-      { new MongoProperties.Builder()
-        .set( HOST, (String) testProperties.get( "multiserver.host" ) )
-        .set( USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
-        .set( PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
-        .set( DBNAME, (String) testProperties.get( "userpass.auth.db" ) )
-        .set( connectionsPerHost, "100" )
-        .set( connectTimeout, "10000" )
-        .set( maxWaitTime, "12000" )
-        .set( readPreference, "primary" )
-        .set( cursorFinalizerEnabled, "true" )
-        .set( socketKeepAlive, "false" )
-        .set( socketTimeout, "0" ).build() } } );
+      { // KERBEROS
+        new MongoProperties.Builder()
+          .set( HOST, (String) testProperties.get( "single.server.host" ) )
+          .set( USERNAME, (String) testProperties.get( "kerberos.user" ) )
+          .set( DBNAME, (String) testProperties.get( "test.db" ) )
+          .set( USE_KERBEROS, "true" ).build() } ,
+      { // KERBEROS keytab
+        new MongoProperties.Builder()
+          .set( HOST, (String) testProperties.get( "single.server.host" ) )
+          .set( USERNAME, (String) testProperties.get( "kerberos.user" ) )
+          .set( PENTAHO_JAAS_KEYTAB_FILE, (String) testProperties.get( "kerberos.keytab" ) )
+          .set( DBNAME, (String) testProperties.get( "test.db" ) )
+          .set( USE_KERBEROS, "true" ).build() } ,
+      { // single server CR
+        new MongoProperties.Builder()
+          .set( HOST, (String) testProperties.get( "single.server.host" ) )
+          .set( PORT, (String) testProperties.get( "userpass.auth.port" ) )
+          .set( USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
+          .set( PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
+          .set( DBNAME, (String) testProperties.get( "test.db" ) ).build() },
+      { // multi-server CR
+        new MongoProperties.Builder()
+          .set( HOST, (String) testProperties.get( "multiserver.host" ) )
+          .set( USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
+          .set( PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
+          .set( DBNAME, (String) testProperties.get( "test.db" ) )
+          .set( connectionsPerHost, "100" )
+          .set( connectTimeout, "10000" )
+          .set( maxWaitTime, "12000" )
+          .set( readPreference, "primary" )
+          .set( cursorFinalizerEnabled, "true" )
+          .set( socketKeepAlive, "false" )
+          .set( socketTimeout, "0" ).build() },
+      { // secondary read pref CR
+        new MongoProperties.Builder()
+          .set( HOST, (String) testProperties.get( "multiserver.host" ) )
+          .set( USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
+          .set( PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
+          .set( DBNAME, (String) testProperties.get( "test.db" ) )
+          .set( readPreference, "secondary" )
+          .set( cursorFinalizerEnabled, "true" ).build() } ,
+    } );
   }
 
   @Test
   public void testCreateDropCollection() throws MongoDbException {
-    MongoClientWrapper clientWrapper = getWrapper( props );
+    clientWrapper = getWrapper( props );
     String tempCollection = "testCollection" + UUID.randomUUID().toString().replace( "-", "" );
-
+    tempCollections.add( tempCollection );
     clientWrapper.createCollection( props.get( DBNAME ), tempCollection );
     MongoCollectionWrapper collectionWrapper = clientWrapper.getCollection( props.get( DBNAME ), tempCollection );
 
@@ -92,17 +131,16 @@ public class ClientWrapperTest extends TestBase {
     assertEquals( props.toString(), "bar", collectionWrapper.distinct( "foo" ).get( 0 ) );
 
     collectionWrapper.drop();
+    tempCollections.remove( tempCollection );
     assertFalse( props.toString(),
       clientWrapper.getCollectionsNames( props.get( DBNAME ) ).contains( tempCollection ) );
-
-    clientWrapper.dispose();
   }
 
   @Test
   public void testCursor() throws MongoDbException {
-    MongoClientWrapper clientWrapper = getWrapper( props );
+    clientWrapper = getWrapper( props );
     String tempCollection = "testCollection" + UUID.randomUUID().toString().replace( "-", "" );
-
+    tempCollections.add( tempCollection );
     clientWrapper.createCollection( props.get( DBNAME ), tempCollection );
     MongoCollectionWrapper collectionWrapper = clientWrapper.getCollection(
       props.get( DBNAME ), tempCollection );
@@ -124,6 +162,7 @@ public class ClientWrapperTest extends TestBase {
     assertEquals( "Should be limited to 10 items", 10, i );
 
     clientWrapper.getCollection( props.get( DBNAME ), tempCollection ).drop();
+    tempCollections.remove( tempCollection );
     String host = props.get( HOST );
     if ( host != null && !( host.split( "," ).length > 1 ) ) {
       // can't assert a specific host or port if multiple servers specified.
@@ -133,7 +172,6 @@ public class ClientWrapperTest extends TestBase {
         Integer.parseInt( (String) testProperties.get( "userpass.auth.port" ) ),
         cursor.getServerAddress().getPort() );
     }
-    clientWrapper.dispose();
   }
 
   private MongoClientWrapper getWrapper( MongoProperties props ) throws MongoDbException {
