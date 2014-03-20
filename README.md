@@ -45,6 +45,41 @@ The factory method will instantiate a MongoClientWrapper that is appropriate for
 * Plain:  Clear-text user/pass.
 * NoAuth:  fallback if the USER, PASSWORD, and KERBEROS properties are all unset.
 
+Setting up a dev environment for Kerberos
+=========================================
+
+The test suite of this project runs a series of tests using Kerberos authentication, both with cached credentials
+as well as a keytab file.  To setup your environment to run these tests:
+1)  Install the kerberos client (for debian linux:  apt-get install krb5-user)
+2)  Configure your /etc/krb5.conf file with the kerberos server's information.  E.g.
+````
+    [realms]
+     PENTAHO.QA = {
+      kdc = bad-badkdc-cent.pentaho.qa
+      admin_server = bad-badkdc-cent.pentaho.qa
+     }
+
+    [domain_realm]
+     .pentaho.qa = PENTAHO.QA
+     pentaho.qa = PENTAHO.QA
+````
+3)  Retrieve Kerberos credentials by running "kinit <principalName>".  This will prompt for a password,
+    and assuming authentication succeeds, will generate credentials.  You can verify credentials were actually
+    created by running "klist".
+4)  Run the "ktutil" command.  This will bring up a ktutil command shell.  From within ktutil, run the following
+(replacing <principal> with the username):
+````
+ktutil:  addent -password -p <principal> -k 1 -e rc4-hmac\r
+````
+This will prompt for a password.  After entering it, run the command
+````
+ktutil:  wkt  kerberos.keytab
+`````
+That should write out a file in cwd with the name "kerberos.keytab".
+
+5)  Install JCE.  This is required for using Kerberos with AES256.
+http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html
+
 
 
 Troubleshooting Kerberos

@@ -19,6 +19,7 @@ package org.pentaho.mongo.wrapper;
 
 import com.mongodb.DBObject;
 import com.mongodb.MongoCredential;
+import com.mongodb.ReplicaSetStatus;
 import org.pentaho.mongo.MongoDbException;
 import org.pentaho.mongo.wrapper.collection.MongoCollectionWrapper;
 
@@ -105,4 +106,9 @@ public interface MongoClientWrapper {
    * @throws MongoDbException
    */
   public void dispose() throws MongoDbException;
+
+  /**
+   * @return the ReplicaSetStatus for the cluster.
+   */
+  ReplicaSetStatus getReplicaSetStatus();
 }
