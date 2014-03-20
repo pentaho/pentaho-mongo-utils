@@ -207,6 +207,10 @@ public class ClientWrapperTest extends TestBase {
 
   @Test
   public void testCreateDropCollection() throws MongoDbException {
+    if ( props.getReadPreference() != ReadPreference.primary() ) {
+      // can't assure secondaries will not be stale at the point of verifying results
+      return;
+    }
     clientWrapper = getWrapper( props );
     String tempCollection = "testCollection" + UUID.randomUUID().toString().replace( "-", "" );
     tempCollections.add( tempCollection );
@@ -229,6 +233,10 @@ public class ClientWrapperTest extends TestBase {
 
   @Test
   public void testCursor() throws MongoDbException {
+    if ( props.getReadPreference() != ReadPreference.primary() ) {
+      // can't assure secondaries will not be stale at the point of verifying results
+      return;
+    }
     clientWrapper = getWrapper( props );
 
     String tempCollection = "testCollection" + UUID.randomUUID().toString().replace( "-", "" );
