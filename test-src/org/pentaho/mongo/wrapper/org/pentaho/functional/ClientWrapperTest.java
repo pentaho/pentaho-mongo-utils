@@ -46,6 +46,10 @@ import static org.pentaho.mongo.MongoProp.*;
 public class ClientWrapperTest extends TestBase {
 
   private final MongoProperties props;
+
+  // how many mongo servers in the cluster?
+  private static final int NUM_MONGOS = ( (String) testProperties.get( "multiserver.host" ) ).split( "," ).length;
+
   private final List<String> tempCollections = new ArrayList<String>();
   private MongoClientWrapper clientWrapper;
   public ClientWrapperTest( MongoProperties props ) {
@@ -112,6 +116,7 @@ public class ClientWrapperTest extends TestBase {
           .set( PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
           .set( DBNAME, (String) testProperties.get( "test.db" ) )
           .set( readPreference, "secondary" )
+          .set( writeConcern, Integer.toString( NUM_MONGOS ) )
           .set( cursorFinalizerEnabled, "true" ).build() } ,
     } );
   }
@@ -175,6 +180,7 @@ public class ClientWrapperTest extends TestBase {
   @Test
   public void testCursor() throws MongoDbException {
     clientWrapper = getWrapper( props );
+
     String tempCollection = "testCollection" + UUID.randomUUID().toString().replace( "-", "" );
     tempCollections.add( tempCollection );
     clientWrapper.createCollection( props.get( DBNAME ), tempCollection );
