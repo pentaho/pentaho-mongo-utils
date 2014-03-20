@@ -17,16 +17,19 @@
 
 package org.pentaho.mongo.wrapper.org.pentaho.functional;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.ReadPreference;
 import com.mongodb.ReplicaSetStatus;
 import com.mongodb.ServerAddress;
+import com.mongodb.util.JSON;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.pentaho.mongo.MongoDbException;
+import org.pentaho.mongo.MongoProp;
 import org.pentaho.mongo.MongoProperties;
 import org.pentaho.mongo.wrapper.MongoClientWrapper;
 import org.pentaho.mongo.wrapper.MongoClientWrapperFactory;
@@ -41,6 +44,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.*;
 import static org.pentaho.mongo.MongoProp.*;
+import static org.pentaho.mongo.MongoProp.tagSet;
 
 @RunWith( value = Parameterized.class )
 public class ClientWrapperTest extends TestBase {
@@ -118,6 +122,24 @@ public class ClientWrapperTest extends TestBase {
           .set( readPreference, "secondary" )
           .set( writeConcern, Integer.toString( NUM_MONGOS ) )
           .set( cursorFinalizerEnabled, "true" ).build() } ,
+      { // secondary read pref CR with tag set1
+        new MongoProperties.Builder()
+          .set( HOST, (String) testProperties.get( "multiserver.host" ) )
+          .set( USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
+          .set( PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
+          .set( DBNAME, (String) testProperties.get( "test.db" ) )
+          .set( readPreference, "secondary" )
+          .set( tagSet, (String) testProperties.get( "tagset1" ) )
+          .set( writeConcern, Integer.toString( NUM_MONGOS ) ).build() } ,
+      { // secondary read pref CR with tag set2
+        new MongoProperties.Builder()
+          .set( HOST, (String) testProperties.get( "multiserver.host" ) )
+          .set( USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
+          .set( PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
+          .set( DBNAME, (String) testProperties.get( "test.db" ) )
+          .set( readPreference, "secondary" )
+          .set( tagSet, (String) testProperties.get( "tagset2" ) )
+          .set( writeConcern, Integer.toString( NUM_MONGOS ) ).build() } ,
     } );
   }
 
@@ -147,11 +169,39 @@ public class ClientWrapperTest extends TestBase {
       assertTrue( "Using primary read preference, but cursor reading from non-primary. \n" + props,
         primary.equals( readServer ) );
     } else if ( props.getReadPreference() == ReadPreference.secondary() ) {
+
+      validateSecondary( wrapper, primary, readServer );
+
+    }
+    wrapper.dispose();
+  }
+
+  private void validateSecondary( MongoClientWrapper wrapper, ServerAddress primary, ServerAddress readServer )
+    throws MongoDbException {
+    final String tagSets = props.get( MongoProp.tagSet );
+
+    if ( tagSets == null ) {
       // don't know for sure what address will be used, but shouldn't be primary.
       assertTrue( "Using secondary read preference, but cursor reading from primary. \n" + props,
         !primary.equals( readServer ) );
+    } else {
+      // make sure the server used is consistent w/ specified tag set.
+      BasicDBList tagSet = (BasicDBList) JSON.parse( "[" + tagSets + "]" );
+      List<String> validReplicaSets = wrapper.getReplicaSetMembersThatSatisfyTagSets(
+        Arrays.asList( tagSet.toArray( new DBObject[ tagSet.size() ] ) ) );
+      List<String> validHosts = extractHostsFromTags( validReplicaSets );
+
+      assertTrue( "Read server not consistent with specified tagSets" + props,
+        validHosts.contains( readServer.getHost() + ":" + readServer.getPort() ) );
     }
-    wrapper.dispose();
+  }
+
+  private List<String> extractHostsFromTags( List<String> validReplicaSets ) {
+    List<String> hosts = new ArrayList<String>();
+    for ( String repSet : validReplicaSets ) {
+      hosts.add( ( (BasicDBObject) JSON.parse( repSet ) ).get( "host" ).toString() );
+    }
+    return hosts;
   }
 
 
