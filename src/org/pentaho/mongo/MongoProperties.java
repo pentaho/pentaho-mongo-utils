@@ -18,9 +18,12 @@
 package org.pentaho.mongo;
 
 import com.mongodb.MongoClientOptions;
+import com.mongodb.ReadPreference;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.pentaho.mongo.MongoProp.readPreference;
 
 /**
  * A container for all properties associated with a MongoClientWrapper, including
@@ -71,6 +74,13 @@ public class MongoProperties {
    */
   public boolean useAllReplicaSetMembers() {
     return Boolean.valueOf( props.get( MongoProp.USE_ALL_REPLICA_SET_MEMBERS ) );
+  }
+
+  /**
+   * @return the com.mongodb.ReadPreference associated with the MongoProp.readPreference value.
+   */
+  public ReadPreference getReadPreference() {
+    return ReadPreference.valueOf( props.get( readPreference ) );
   }
 
   @Override

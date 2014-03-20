@@ -19,6 +19,9 @@ package org.pentaho.mongo.wrapper.org.pentaho.functional;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import com.mongodb.ReadPreference;
+import com.mongodb.ReplicaSetStatus;
+import com.mongodb.ServerAddress;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,8 +39,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 import static org.pentaho.mongo.MongoProp.*;
 
 @RunWith( value = Parameterized.class )
@@ -113,6 +115,40 @@ public class ClientWrapperTest extends TestBase {
           .set( cursorFinalizerEnabled, "true" ).build() } ,
     } );
   }
+
+
+  @Test
+  public void testReadPref() throws MongoDbException {
+    // validate the expected server based on read preference specification.
+    if ( !props.useAllReplicaSetMembers() && !( props.get( HOST ).split( "," ).length > 1 ) ) {
+      // not using replica sets, nothing to validate.
+      return;
+    }
+
+    final MongoClientWrapper wrapper = getWrapper( props );
+    ReplicaSetStatus status = wrapper.getReplicaSetStatus();
+    if ( status == null ) {
+      // status should be non-null if using replica sets, which will be true
+      // if either the property is set to TRUE, or more than one HOST specified.
+      fail( "Could not retrieve replica set status with properties:  "  + props );
+    }
+    final ServerAddress primary = status.getMaster();
+    final MongoCursorWrapper cursor = wrapper.getCollection( props.get( DBNAME ), "sales" ).find();
+
+    cursor.next();
+    ServerAddress readServer = cursor.getServerAddress();
+
+    if ( props.getReadPreference() == ReadPreference.primary() ) {
+      assertTrue( "Using primary read preference, but cursor reading from non-primary. \n" + props,
+        primary.equals( readServer ) );
+    } else if ( props.getReadPreference() == ReadPreference.secondary() ) {
+      // don't know for sure what address will be used, but shouldn't be primary.
+      assertTrue( "Using secondary read preference, but cursor reading from primary. \n" + props,
+        !primary.equals( readServer ) );
+    }
+    wrapper.dispose();
+  }
+
 
   @Test
   public void testCreateDropCollection() throws MongoDbException {
