@@ -1,2 +1,2 @@
-Import-Package: com.mongodb,com.mongodb.util
+Import-Package: com.mongodb,com.mongodb.util,javax.security.sasl,com.sun.security.auth.module,javax.security.auth.login,javax.security.auth
 Export-Package: *
