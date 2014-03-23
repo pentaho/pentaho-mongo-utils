@@ -50,7 +50,8 @@ Setting up a dev environment for Kerberos
 
 The test suite of this project runs a series of tests using Kerberos authentication, both with cached credentials
 as well as a keytab file.  To setup your environment to run these tests:
-1)  Install the kerberos client (for debian linux:  apt-get install krb5-user)
+
+1)  Install the kerberos client (for debian linux:  apt-get install krb5-user)   
 2)  Configure your /etc/krb5.conf file with the kerberos server's information.  E.g.
 ````
     [realms]
@@ -63,9 +64,18 @@ as well as a keytab file.  To setup your environment to run these tests:
      .pentaho.qa = PENTAHO.QA
      pentaho.qa = PENTAHO.QA
 ````
-3)  Retrieve Kerberos credentials by running "kinit <principalName>".  This will prompt for a password,
+3.  Retrieve Kerberos credentials by running "kinit <principalName>" (e.g. "kinit buildguy@PENTAHO.QA").  This will prompt for a password,
     and assuming authentication succeeds, will generate credentials.  You can verify credentials were actually
-    created by running "klist".
+    created by running "klist", which should show something like this:
+````
+Ticket cache: FILE:/tmp/krb5cc_1000
+Default principal: buildguy@PENTAHO.QA
+
+Valid starting    Expires           Service principal
+23/03/2014 06:06  24/03/2014 06:06  krbtgt/PENTAHO.QA@PENTAHO.QA
+	renew until 23/03/2014 06:06
+
+````
 4)  Run the "ktutil" command.  This will bring up a ktutil command shell.  From within ktutil, run the following
 (replacing <principal> with the username):
 ````
@@ -75,10 +85,11 @@ This will prompt for a password.  After entering it, run the command
 ````
 ktutil:  wkt  kerberos.keytab
 `````
-That should write out a file in cwd with the name "kerberos.keytab".
+That should write out a file in cwd with the name "kerberos.keytab".   
 
 5)  Install JCE.  This is required for using Kerberos with AES256.
-http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html
+http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html  
+6)  If authenticating with kerberos in biserver, make sure to set the USE_KERBEROS property to true in your olap4j.properties file.  If using a keytab file, also specify PENTAHO_JAAS_AUTH_MODE=KERBEROS_KEYTAB and PENTAHO_JAAS_KEYTAB_FILE=<path/to/keytabfile>.  See MongoProps for more detail.
 
 
 
