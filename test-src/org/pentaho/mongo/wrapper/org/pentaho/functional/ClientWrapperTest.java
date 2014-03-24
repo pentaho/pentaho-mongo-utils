@@ -92,6 +92,7 @@ public class ClientWrapperTest extends TestBase {
           .set( USERNAME, (String) testProperties.get( "kerberos.user" ) )
           .set( PENTAHO_JAAS_KEYTAB_FILE, (String) testProperties.get( "kerberos.keytab" ) )
           .set( DBNAME, (String) testProperties.get( "test.db" ) )
+          .set( PENTAHO_JAAS_AUTH_MODE, "KERBEROS_KEYTAB" )
           .set( USE_KERBEROS, "true" ).build() } ,
       { // single server CR
         new MongoProperties.Builder()
