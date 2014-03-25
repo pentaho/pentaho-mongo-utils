@@ -19,6 +19,8 @@ package org.pentaho.mongo;
 
 import com.mongodb.MongoClientOptions;
 
+import javax.net.ssl.SSLSocketFactory;
+
 /**
  * Enumeration of the available properties that can be used when configuring a MongoDB client via a
  * MongoClientWrapper.  These properties roughly break down into a set relevant to MongoCredentials,
@@ -158,6 +160,17 @@ public enum MongoProp {
     }
   },
 
+  /**
+   * Boolean which controls whether connections will use SSL
+   */
+  useSSL {
+    @Override
+    public void setOption( MongoClientOptions.Builder builder, MongoProperties props, MongoPropToOption propToOption ) {
+      if ( "true".equalsIgnoreCase( props.get( useSSL ) ) ) {
+        builder.socketFactory( SSLSocketFactory.getDefault() );
+      }
+    }
+  },
 
   /**
    * Read preference to use:  [primary, primaryPreferred, secondary, secondaryPreferred, nearest]
