@@ -21,6 +21,8 @@ import com.mongodb.MongoClientOptions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import javax.net.ssl.SSLSocketFactory;
+
 import static junit.framework.Assert.*;
 import static org.pentaho.mongo.MongoProp.*;
 
@@ -28,12 +30,13 @@ public class MongoPropertiesTest {
   @Test
   public void testBuildsMongoClientOptions() throws Exception {
     MongoProperties props = new MongoProperties.Builder()
-      .set(connectionsPerHost, "127" )
-      .set(connectTimeout, "333" )
+      .set( connectionsPerHost, "127" )
+      .set( connectTimeout, "333" )
       .set( maxWaitTime, "12345" )
       .set( cursorFinalizerEnabled, "false" )
       .set( socketKeepAlive, "true" )
       .set( socketTimeout, "4" )
+      .set( useSSL, "true" )
       .build();
     MongoUtilLogger log = Mockito.mock( MongoUtilLogger.class );
     MongoClientOptions options = props.buildMongoClientOptions( log );
@@ -43,6 +46,7 @@ public class MongoPropertiesTest {
     assertFalse( options.isCursorFinalizerEnabled() );
     assertTrue( options.isSocketKeepAlive() );
     assertEquals( 4, options.getSocketTimeout() );
+    assertTrue( options.getSocketFactory() instanceof SSLSocketFactory );
   }
 
   @Test
@@ -56,5 +60,6 @@ public class MongoPropertiesTest {
     assertTrue( options.isCursorFinalizerEnabled() );
     assertFalse( options.isSocketKeepAlive() );
     assertEquals( 0, options.getSocketTimeout() );
+    assertFalse( options.getSocketFactory() instanceof SSLSocketFactory );
   }
 }
