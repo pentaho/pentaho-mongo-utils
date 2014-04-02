@@ -15,7 +15,7 @@
  *
  */
 
-package org.pentaho.mongo.wrapper.org.pentaho.functional;
+package org.pentaho.mongo.functional;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;

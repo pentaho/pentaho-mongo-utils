@@ -15,7 +15,7 @@
  *
  */
 
-package org.pentaho.mongo.wrapper.org.pentaho.functional;
+package org.pentaho.mongo.functional;
 
 import java.io.FileReader;
 import java.io.IOException;
