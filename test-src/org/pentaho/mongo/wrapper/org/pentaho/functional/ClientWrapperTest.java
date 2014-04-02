@@ -25,6 +25,7 @@ import com.mongodb.ReplicaSetStatus;
 import com.mongodb.ServerAddress;
 import com.mongodb.util.JSON;
 import org.junit.After;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -44,7 +45,6 @@ import java.util.UUID;
 
 import static org.junit.Assert.*;
 import static org.pentaho.mongo.MongoProp.*;
-import static org.pentaho.mongo.MongoProp.tagSet;
 
 @RunWith( value = Parameterized.class )
 public class ClientWrapperTest extends TestBase {
@@ -58,6 +58,11 @@ public class ClientWrapperTest extends TestBase {
   private MongoClientWrapper clientWrapper;
   public ClientWrapperTest( MongoProperties props ) {
     this.props = props;
+  }
+
+  @BeforeClass
+  public static void setUp() throws Exception {
+    System.setProperty( "javax.net.ssl.trustStore", "keystore.jks" );
   }
 
   @After
@@ -141,6 +146,14 @@ public class ClientWrapperTest extends TestBase {
           .set( readPreference, "secondary" )
           .set( tagSet, (String) testProperties.get( "tagset2" ) )
           .set( writeConcern, Integer.toString( NUM_MONGOS ) ).build() } ,
+      { // SSL turned on
+        new MongoProperties.Builder()
+          .set( HOST, (String) testProperties.get( "ssl.host" ) )
+          .set( USERNAME, (String) testProperties.get( "ssl.user" ) )
+          .set( PASSWORD, (String) testProperties.get( "ssl.password" ) )
+          .set( DBNAME, (String) testProperties.get( "test.db" ) )
+          .set( USE_ALL_REPLICA_SET_MEMBERS, "false" )
+          .set( useSSL, "true" ).build() }
     } );
   }
 
