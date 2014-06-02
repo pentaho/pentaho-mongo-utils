@@ -25,6 +25,8 @@
     <jar destfile="${dist.dir}/${ivy.artifact.id}-${project.revision}-noosgi.jar" manifest="${dist.manifest.file}">
       <fileset dir="${classes.dir}" />
     </jar>
+    <jar destfile="${dist.dir}/${ivy.artifact.id.mse}-${project.revision}.jar" manifest="${basedir}/mongo-security-ext.MF">
+    </jar>
   </target>
   <target name="dist" depends="jar" description="Creates a distribution" />
   <!--
@@ -41,6 +43,18 @@
     </antcall>
   </target>
   -->
+  <target name="publish" depends="dist, dist-source, publish-nojar">
+    <antcall target="publish-nojar.internal">
+      <param name="source.publish" value="false" />
+      <param name="ivy.artifact.id" value="${ivy.artifact.id.mse}" />
+    </antcall>
+  </target>
+  <target name="publish-local" depends="dist, dist-source, publish-local-nojar">
+    <antcall target="publish-local-nojar.internal">
+      <param name="source.publish" value="false" />
+      <param name="ivy.artifact.id" value="${ivy.artifact.id.mse}" />
+    </antcall>
+  </target>
   <target name="runtest" description="Runs the test you specify on the command line with -Dtest=" depends="">
     <junit printsummary="withOutAndErr" fork="no">
       <classpath refid="test.classpath" />
