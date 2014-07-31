@@ -108,6 +108,18 @@ public interface MongoClientWrapper {
   public void dispose() throws MongoDbException;
 
   /**
+   * Performs an action with the given database
+   * 
+   * @param db
+   *          the database name
+   * @param action
+   *          the action to perform
+   * @return the result of the action
+   * @throws MongoDbException
+   */
+  public <ReturnType> ReturnType perform( String db, MongoDBAction<ReturnType> action ) throws MongoDbException;
+
+  /**
    * @return the ReplicaSetStatus for the cluster.
    */
   ReplicaSetStatus getReplicaSetStatus();
