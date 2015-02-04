@@ -84,6 +84,16 @@ public class DefaultMongoCollectionWrapper implements MongoCollectionWrapper {
   }
 
   @Override
+  public WriteResult remove() throws MongoDbException {
+    return remove( new BasicDBObject() );
+  }
+
+  @Override
+  public WriteResult remove( DBObject query ) throws MongoDbException {
+    return collection.remove( query );
+  }
+
+  @Override
   public WriteResult save( DBObject toTry ) throws MongoDbException {
     return collection.save( toTry );
   }
