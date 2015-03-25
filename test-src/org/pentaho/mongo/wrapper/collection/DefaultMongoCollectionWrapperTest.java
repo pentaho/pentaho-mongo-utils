@@ -1,11 +1,14 @@
 package org.pentaho.mongo.wrapper.collection;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class DefaultMongoCollectionWrapperTest {
 
@@ -21,7 +24,6 @@ public class DefaultMongoCollectionWrapperTest {
   @Test
   public void testRemove() throws Exception {
     defaultMongoCollectionWrapper.remove();
-    DBObject mockDBObject = mock( DBObject.class );
-    defaultMongoCollectionWrapper.remove( mockDBObject );
+    verify( mockDBCollection, times( 1 ) ).remove( eq( new BasicDBObject() ) );
   }
 }
