@@ -5,6 +5,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.mongo.MongoUtilLogger;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class NoAuthMongoClientWrapperTest {
 
@@ -22,6 +24,7 @@ public class NoAuthMongoClientWrapperTest {
   @Test
   public void testPerform() throws Exception {
     MongoDBAction mockMongoDBAction = mock( MongoDBAction.class );
-    noAuthMongoClientWrapper.perform("Test", mockMongoDBAction );
+    noAuthMongoClientWrapper.perform( "Test", mockMongoDBAction );
+    verify( mockMongoDBAction, times( 1 ) ).perform( noAuthMongoClientWrapper.getDb( "Test" ) );
   }
 }
