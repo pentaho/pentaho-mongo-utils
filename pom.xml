@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.pentaho</groupId>
+    <artifactId>pentaho-ce-jar-parent-pom</artifactId>
+    <version>1.0.11</version>
+    <!-- https://github.com/pentaho/maven-parent-poms/blob/pentaho-ce-jar-parent-pom-1.0.1/pentaho-ce-jar-parent-pom/pom.xml -->
+    <relativePath />
+  </parent>
+
+  <name>Pentaho Platform Mongo Utils</name>
+  <groupId>pentaho</groupId>
+  <artifactId>pentaho-mongo-utils</artifactId>
+  <version>6.0-SNAPSHOT</version>
+  <packaging>bundle</packaging>
+
+  <properties>
+    <dependency.mongo-driver.revision>2.11.1</dependency.mongo-driver.revision>
+  </properties>
+
+  <scm>
+    <developerConnection>scm:git:git@github.com:pentaho/pentaho-mongo-utils.git</developerConnection>
+    <url>https://github.com/pentaho/pentaho-mongo-utils.git</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <dependencies>
+    <!-- ######################### COMPILE ######################### -->
+    <dependency>
+      <groupId>biz.aQute</groupId>
+      <artifactId>bnd</artifactId>
+      <version>2.3.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mongodb</groupId>
+      <artifactId>mongo-java-driver</artifactId>
+      <version>${dependency.mongo-driver.revision}</version>
+      <scope>compile</scope> <!-- It was default->default -->
+      <exclusions> <!-- Transitive=false -->
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <!-- ######################### RUNTIME ######################### -->
+    <!-- ######################### PROVIDED ######################## -->
+    <!-- ########################## TEST ########################### -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.4</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.8.5</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.3.7</version>
+        <extensions>true</extensions>
+          <configuration>
+            <instructions>
+              <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+              <Bundle-Version>${project.version}</Bundle-Version> 
+              <Export-Package>pentaho-mongo-utils</Export-Package>             
+            </instructions>
+          </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  
+</project>
