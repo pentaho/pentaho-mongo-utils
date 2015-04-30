@@ -23,10 +23,10 @@ import com.mongodb.util.JSON;
 import com.mongodb.util.JSONParseException;
 import org.junit.Test;
 
-import static com.mongodb.util.MyAsserts.assertFalse;
 import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
