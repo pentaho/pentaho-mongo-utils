@@ -84,6 +84,11 @@ public class DefaultMongoCollectionWrapper implements MongoCollectionWrapper {
   }
 
   @Override
+  public void createIndex( BasicDBObject mongoIndex, BasicDBObject options ) throws MongoDbException {
+    collection.createIndex( mongoIndex, options );
+  }
+
+  @Override
   public WriteResult remove() throws MongoDbException {
     return remove( new BasicDBObject() );
   }

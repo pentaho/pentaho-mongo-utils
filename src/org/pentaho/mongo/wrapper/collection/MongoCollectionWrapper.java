@@ -54,6 +54,8 @@ public interface MongoCollectionWrapper {
 
   void createIndex( BasicDBObject mongoIndex ) throws MongoDbException;
 
+  void createIndex( BasicDBObject mongoIndex, BasicDBObject options ) throws MongoDbException;
+
   WriteResult remove() throws MongoDbException;
 
   WriteResult remove( DBObject query ) throws MongoDbException;
