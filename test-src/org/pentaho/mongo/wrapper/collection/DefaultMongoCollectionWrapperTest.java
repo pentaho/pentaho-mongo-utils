@@ -26,4 +26,12 @@ public class DefaultMongoCollectionWrapperTest {
     defaultMongoCollectionWrapper.remove();
     verify( mockDBCollection, times( 1 ) ).remove( eq( new BasicDBObject() ) );
   }
+
+  @Test
+  public void testCreateIndex() throws Exception {
+    BasicDBObject index = mock( BasicDBObject.class );
+    BasicDBObject options = mock( BasicDBObject.class );
+    defaultMongoCollectionWrapper.createIndex( index, options );
+    verify( mockDBCollection ).createIndex( index, options );
+  }
 }
