@@ -58,7 +58,7 @@ public enum NamedReadPreference {
 
   public ReadPreference getTaggableReadPreference( DBObject firstTagSet, DBObject... remainingTagSets ) {
 
-    switch( this ) {
+    switch ( this ) {
       case PRIMARY_PREFERRED:
         return ReadPreference.primaryPreferred( firstTagSet, remainingTagSets );
       case SECONDARY:

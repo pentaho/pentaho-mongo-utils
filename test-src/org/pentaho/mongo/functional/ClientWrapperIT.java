@@ -47,7 +47,7 @@ import static org.junit.Assert.*;
 import static org.pentaho.mongo.MongoProp.*;
 
 @RunWith( value = Parameterized.class )
-public class ClientWrapperTest extends TestBase {
+public class ClientWrapperIT extends TestBase {
 
   private final MongoProperties props;
 
@@ -56,7 +56,7 @@ public class ClientWrapperTest extends TestBase {
 
   private final List<String> tempCollections = new ArrayList<String>();
   private MongoClientWrapper clientWrapper;
-  public ClientWrapperTest( MongoProperties props ) {
+  public ClientWrapperIT( MongoProperties props ) {
     this.props = props;
   }
 
@@ -84,7 +84,7 @@ public class ClientWrapperTest extends TestBase {
    */
   @Parameterized.Parameters
   public static Collection<MongoProperties[]> data() {
-    return Arrays.asList(new MongoProperties[][] {
+    return Arrays.asList( new MongoProperties[][] {
       { // KERBEROS
         new MongoProperties.Builder()
           .set( HOST, (String) testProperties.get( "single.server.host" ) )

@@ -196,7 +196,7 @@ public class KerberosUtil {
     throws LoginException {
     LoginContext lc;
     Subject subject;
-    switch( authMode ) {
+    switch ( authMode ) {
       case EXTERNAL:
         // Use the default JAAS configuration by only supplying the app name
         lc = new LoginContext( KERBEROS_APP_NAME );
