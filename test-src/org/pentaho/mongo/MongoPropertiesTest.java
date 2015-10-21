@@ -18,6 +18,7 @@
 package org.pentaho.mongo;
 
 import com.mongodb.MongoClientOptions;
+import com.mongodb.ReadPreference;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -30,14 +31,17 @@ public class MongoPropertiesTest {
   @Test
   public void testBuildsMongoClientOptions() throws Exception {
     MongoProperties props = new MongoProperties.Builder()
-      .set( connectionsPerHost, "127" )
-      .set( connectTimeout, "333" )
-      .set( maxWaitTime, "12345" )
-      .set( cursorFinalizerEnabled, "false" )
-      .set( socketKeepAlive, "true" )
-      .set( socketTimeout, "4" )
-      .set( useSSL, "true" )
-      .build();
+        .set( connectionsPerHost, "127" )
+        .set( connectTimeout, "333" )
+        .set( maxWaitTime, "12345" )
+        .set( cursorFinalizerEnabled, "false" )
+        .set( socketKeepAlive, "true" )
+        .set( socketTimeout, "4" )
+        .set( useSSL, "true" )
+        .set( readPreference, "primary" )
+        .set( USE_KERBEROS, "false" )
+        .set( USE_ALL_REPLICA_SET_MEMBERS, "false" )
+        .build();
     MongoUtilLogger log = Mockito.mock( MongoUtilLogger.class );
     MongoClientOptions options = props.buildMongoClientOptions( log );
     assertEquals( 127, options.getConnectionsPerHost() );
@@ -47,6 +51,23 @@ public class MongoPropertiesTest {
     assertTrue( options.isSocketKeepAlive() );
     assertEquals( 4, options.getSocketTimeout() );
     assertTrue( options.getSocketFactory() instanceof SSLSocketFactory );
+    assertEquals( options.getReadPreference(), ReadPreference.primary() );
+    assertEquals( props.getReadPreference(), ReadPreference.primary() );
+    assertFalse( props.useAllReplicaSetMembers() );
+    assertFalse( props.useKerberos() );
+    assertEquals( "MongoProperties:\n"
+        + "connectionsPerHost=127\n"
+        + "connectTimeout=333\n"
+        + "cursorFinalizerEnabled=false\n"
+        + "HOST=localhost\n"
+        + "maxWaitTime=12345\n"
+        + "PASSWORD=\n"
+        + "readPreference=primary\n"
+        + "socketKeepAlive=true\n"
+        + "socketTimeout=4\n"
+        + "USE_ALL_REPLICA_SET_MEMBERS=false\n"
+        + "USE_KERBEROS=false\n"
+        + "useSSL=true\n", props.toString() );
   }
 
   @Test

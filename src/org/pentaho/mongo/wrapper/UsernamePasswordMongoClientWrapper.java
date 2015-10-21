@@ -1,5 +1,5 @@
 /*!
-  * Copyright 2010 - 2014 Pentaho Corporation.  All rights reserved.
+  * Copyright 2010 - 2015 Pentaho Corporation.  All rights reserved.
   *
   * Licensed under the Apache License, Version 2.0 (the "License");
   * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper {
   }
 
   UsernamePasswordMongoClientWrapper( MongoClient mongo, MongoUtilLogger log, String user ) {
-    super( mongo, log );
+    super( mongo, null, log );
     props = null;
     this.user = user;
   }
@@ -65,9 +65,9 @@ class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper {
   public List<MongoCredential> getCredentialList() {
     List<MongoCredential> credList = new ArrayList<MongoCredential>();
     credList.add( MongoCredential.createCredential(
-      props.get( MongoProp.USERNAME ),
-      props.get( MongoProp.DBNAME ),
-      props.get( MongoProp.PASSWORD ).toCharArray() ) );
+        props.get( MongoProp.USERNAME ),
+        props.get( MongoProp.DBNAME ),
+        props.get( MongoProp.PASSWORD ).toCharArray() ) );
     return credList;
   }
 }

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2010 - 2014 Pentaho Corporation.  All rights reserved.
+ * Copyright 2010 - 2015 Pentaho Corporation.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,13 @@ package org.pentaho.mongo;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.ReadPreference;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.pentaho.mongo.MongoProp.readPreference;
 
@@ -87,7 +92,16 @@ public class MongoProperties {
   public String toString() {
     StringBuilder builder = new StringBuilder();
     builder.append( "MongoProperties:\n" );
-    for ( MongoProp prop : props.keySet() ) {
+    List<MongoProp> propList = new ArrayList<MongoProp>( props.keySet() );
+    Collections.sort( propList, new Comparator<MongoProp>() {
+          @Override public int compare( MongoProp p1, MongoProp p2 ) {
+            return Objects.compare(
+                p1 == null ? null : p1.name(),
+                p2 == null ? null : p2.name(),
+                String.CASE_INSENSITIVE_ORDER );
+          }
+        } );
+    for ( MongoProp prop : propList ) {
       builder.append( String.format( "%s=%s\n", prop.name(), props.get( prop ) ) );
     }
     return builder.toString();
