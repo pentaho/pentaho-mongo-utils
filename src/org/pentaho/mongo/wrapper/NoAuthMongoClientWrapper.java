@@ -56,6 +56,8 @@ class NoAuthMongoClientWrapper implements MongoClientWrapper {
   public static final String REPL_SET_LAST_ERROR_MODES = "getLastErrorModes"; //$NON-NLS-1$
   public static final String REPL_SET_MEMBERS = "members"; //$NON-NLS-1$
 
+  static MongoClientFactory clientFactory = new MongoClientFactory();
+
   private final MongoClient mongo;
   private final MongoUtilLogger log;
 
@@ -75,9 +77,13 @@ class NoAuthMongoClientWrapper implements MongoClientWrapper {
     mongo = getClient( props.buildMongoClientOptions( log ) );
   }
 
-  public NoAuthMongoClientWrapper( MongoClient mongo, MongoUtilLogger log ) {
+  NoAuthMongoClientWrapper(
+      MongoClient mongo,
+      MongoProperties props,
+      MongoUtilLogger log ) {
     this.mongo = mongo;
     this.log = log;
+    this.props = props;
   }
 
   MongoClient getMongo() {
@@ -147,21 +153,10 @@ class NoAuthMongoClientWrapper implements MongoClientWrapper {
           MongoClientWrapper.class,
           "MongoNoAuthWrapper.Message.Error.NoHostSet" ) );
     }
-    // Mongo's java driver will discover all replica set or shard
-    // members (Mongos) automatically when MongoClient is constructed
-    // using a list of ServerAddresses. The javadocs state that MongoClient
-    // should be constructed using a SingleServer address instance (rather
-    // than a list) when connecting to a stand-alone host - this is why
-    // we differentiate here between a list containing one ServerAddress
-    // and a single ServerAddress instance via the useAllReplicaSetMembers
-    // flag.
-    if ( props.useAllReplicaSetMembers() || serverAddressList.size() > 1 ) {
-      return new MongoClient( serverAddressList, credList, opts );
-    } else {
-      return new MongoClient( serverAddressList.get( 0 ), credList, opts );
-    }
+    return clientFactory
+        .getMongoClient( serverAddressList, credList, opts,
+            props.useAllReplicaSetMembers() );
   }
-
 
 
   /**
@@ -253,12 +248,12 @@ class NoAuthMongoClientWrapper implements MongoClientWrapper {
       DB db = getDb( dbName );
 
       if ( db == null ) {
-        throw new Exception(
+        throw new MongoDbException(
           BaseMessages.getString( PKG, "MongoNoAuthWrapper.ErrorMessage.NonExistentDB", dbName ) ); //$NON-NLS-1$
       }
 
       if ( Util.isEmpty( collection ) ) {
-        throw new Exception(
+        throw new MongoDbException(
           BaseMessages.getString( PKG, "MongoNoAuthWrapper.ErrorMessage.NoCollectionSpecified" ) ); //$NON-NLS-1$
       }
 
@@ -268,7 +263,7 @@ class NoAuthMongoClientWrapper implements MongoClientWrapper {
 
       DBCollection coll = db.getCollection( collection );
       if ( coll == null ) {
-        throw new Exception( BaseMessages.getString( PKG,
+        throw new MongoDbException( BaseMessages.getString( PKG,
           "MongoNoAuthWrapper.ErrorMessage.UnableToGetInfoForCollection", //$NON-NLS-1$
           collection ) );
       }
@@ -276,7 +271,7 @@ class NoAuthMongoClientWrapper implements MongoClientWrapper {
       List<DBObject> collInfo = coll.getIndexInfo();
       List<String> result = new ArrayList<String>();
       if ( collInfo == null || collInfo.size() == 0 ) {
-        throw new Exception( BaseMessages.getString( PKG,
+        throw new MongoDbException( BaseMessages.getString( PKG,
           "MongoNoAuthWrapper.ErrorMessage.UnableToGetInfoForCollection", //$NON-NLS-1$
           collection ) );
       }
@@ -288,7 +283,7 @@ class NoAuthMongoClientWrapper implements MongoClientWrapper {
       return result;
     } catch ( Exception e ) {
       log.error( BaseMessages.getString( PKG, "MongoNoAuthWrapper.ErrorMessage.GeneralError.Message" ) //$NON-NLS-1$
-        + ":\n\n" + e.getMessage(), e ); //$NON-NLS-1$
+          + ":\n\n" + e.getMessage(), e ); //$NON-NLS-1$
       if ( e instanceof MongoDbException ) {
         throw (MongoDbException) e;
       } else {
@@ -318,41 +313,31 @@ class NoAuthMongoClientWrapper implements MongoClientWrapper {
             if ( members instanceof BasicDBList ) {
               if ( ( (BasicDBList) members ).size() == 0 ) {
                 // log that there are no replica set members defined
-                if ( log != null ) {
-                  log.info( BaseMessages.getString( PKG,
+                logInfo( BaseMessages.getString( PKG,
                     "MongoNoAuthWrapper.Message.Warning.NoReplicaSetMembersDefined" ) ); //$NON-NLS-1$
-                }
               } else {
                 setMembers = (BasicDBList) members;
               }
 
             } else {
               // log that there are no replica set members defined
-              if ( log != null ) {
-                log.info( BaseMessages.getString( PKG,
+              logInfo( BaseMessages.getString( PKG,
                   "MongoNoAuthWrapper.Message.Warning.NoReplicaSetMembersDefined" ) ); //$NON-NLS-1$
-              }
             }
           } else {
             // log that there are no replica set members defined
-            if ( log != null ) {
-              log.info( BaseMessages.getString( PKG,
+            logInfo( BaseMessages.getString( PKG,
                 "MongoNoAuthWrapper.Message.Warning.NoReplicaSetMembersDefined" ) ); //$NON-NLS-1$
-            }
           }
         } else {
           // log that the replica set collection is not available
-          if ( log != null ) {
-            log.info( BaseMessages.getString( PKG,
+          logInfo( BaseMessages.getString( PKG,
               "MongoNoAuthWrapper.Message.Warning.ReplicaSetCollectionUnavailable" ) ); //$NON-NLS-1$
-          }
         }
       } else {
         // log that the local database is not available!!
-        if ( log != null ) {
-          log.info(
+        logInfo(
             BaseMessages.getString( PKG, "MongoNoAuthWrapper.Message.Warning.LocalDBNotAvailable" ) ); //$NON-NLS-1$
-        }
       }
     } catch ( Exception ex ) {
       throw new MongoDbException( ex );
@@ -363,6 +348,12 @@ class NoAuthMongoClientWrapper implements MongoClientWrapper {
     }
 
     return setMembers;
+  }
+
+  private void logInfo( String message ) {
+    if ( log != null ) {
+      log.info( message );
+    }
   }
 
   protected List<String> setupAllTags( BasicDBList members ) {
