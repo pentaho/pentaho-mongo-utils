@@ -27,8 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implementation of MongoClientWrapper which uses no credentials.
- * Should only be instantiated by MongoClientWrapperFactory.
+ * Implementation of MongoClientWrapper which uses no credentials. Should only be instantiated by
+ * MongoClientWrapperFactory.
  */
 class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper {
   private final String user;
@@ -64,10 +64,23 @@ class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper {
   @Override
   public List<MongoCredential> getCredentialList() {
     List<MongoCredential> credList = new ArrayList<MongoCredential>();
-    credList.add( MongoCredential.createCredential(
+    String autMecha = props.get( MongoProp.AUTH_MECHA );
+    //if not value on AUTH_MECHA set "MONGODB-CR" default authentication mechanism
+    if ( autMecha == null ) {
+      autMecha = "";
+    }
+
+    if ( autMecha.equals( "SCRAM-SHA-1" ) ) {
+      credList.add( MongoCredential.createScramSha1Credential(
         props.get( MongoProp.USERNAME ),
-        props.get( MongoProp.DBNAME ),
+        props.get( MongoProp.AUTH_DB ),
         props.get( MongoProp.PASSWORD ).toCharArray() ) );
+    } else {
+      credList.add( MongoCredential.createCredential(
+        props.get( MongoProp.USERNAME ),
+        props.get( MongoProp.AUTH_DB ),
+        props.get( MongoProp.PASSWORD ).toCharArray() ) );
+    }
     return credList;
   }
 }

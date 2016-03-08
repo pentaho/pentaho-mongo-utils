@@ -212,7 +212,17 @@ public enum MongoProp {
   /**
    * Specifies the write timeout in millis for the WriteConcern.
    */
-  wTimeout;
+  wTimeout,
+
+  /**
+   * MongoDB 3.0 changed the default authentication mechanism from MONGODB-CR to SCRAM-SHA-1
+   */
+  AUTH_MECHA,
+
+  /**
+   * authentication database definition
+   */
+  AUTH_DB;
 
 
   public void setOption( MongoClientOptions.Builder builder, MongoProperties props, MongoPropToOption propToOption )
