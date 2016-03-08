@@ -64,10 +64,19 @@ class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper {
   @Override
   public List<MongoCredential> getCredentialList() {
     List<MongoCredential> credList = new ArrayList<MongoCredential>();
-    credList.add( MongoCredential.createCredential(
+    if(props.get( MongoProp.AUTH_MECHA).equals( "SCRAM-SHA-1" ))
+    {
+      credList.add( MongoCredential.createScramSha1Credential(
         props.get( MongoProp.USERNAME ),
-        props.get( MongoProp.DBNAME ),
+        props.get( MongoProp.AUTH_DB),
         props.get( MongoProp.PASSWORD ).toCharArray() ) );
+    }
+    else {
+      credList.add( MongoCredential.createCredential(
+        props.get( MongoProp.USERNAME ),
+        props.get( MongoProp.AUTH_DB),
+        props.get( MongoProp.PASSWORD ).toCharArray() ) );
+    }
     return credList;
   }
 }

@@ -6,7 +6,7 @@ Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
 Bundle-ManifestVersion: 2
 Bundle-Name: MongoDB Java Driver Fragment
 Bundle-SymbolicName: org.mongodb.mongo-security-ext
-Bundle-Version: 2.11.1.RELEASE
+Bundle-Version: 2.13.3.RELEASE
 Fragment-Host:  org.mongodb.mongo-java-driver
 Import-Package: javax.security.sasl,javax.security.auth.login,javax.security.auth,org.ietf.jgss
 
