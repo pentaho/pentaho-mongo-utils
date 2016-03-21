@@ -82,14 +82,16 @@ public class UsernamePasswordMongoClientWrapperTest {
   @Test
   public void getCredentialListUsernameOnlyTest() throws Exception {
     final String username = "testuser";
-    mongoPropertiesBuilder = new MongoProperties.Builder().set( MongoProp.USERNAME, username );
+    final String source = "dbname";
+    mongoPropertiesBuilder =
+      new MongoProperties.Builder().set( MongoProp.USERNAME, username ).set( MongoProp.DBNAME, source );
     UsernamePasswordMongoClientWrapper mongoClientWrapper =
         new UsernamePasswordMongoClientWrapper( mongoPropertiesBuilder.build(), log );
     List<MongoCredential> credentials = mongoClientWrapper.getCredentialList();
     Assert.assertEquals( 1, credentials.size() );
     Assert.assertEquals( null, credentials.get( 0 ).getMechanism() );
     Assert.assertEquals( username, credentials.get( 0 ).getUserName() );
-    Assert.assertEquals( null, credentials.get( 0 ).getSource() );
+    Assert.assertEquals( source, credentials.get( 0 ).getSource() );
     Assert.assertArrayEquals( "".toCharArray(), credentials.get( 0 ).getPassword() );
   }
 

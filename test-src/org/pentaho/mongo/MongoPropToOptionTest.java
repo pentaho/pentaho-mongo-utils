@@ -1,5 +1,5 @@
 /*!
-* Copyright 2010 - 2015 Pentaho Corporation.  All rights reserved.
+* Copyright 2010 - 2016 Pentaho Corporation.  All rights reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -17,19 +17,25 @@
 
 package org.pentaho.mongo;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import com.mongodb.ReadPreference;
+import com.mongodb.Tag;
+import com.mongodb.TagSet;
 import com.mongodb.TaggableReadPreference;
 import com.mongodb.WriteConcern;
 import com.mongodb.util.JSON;
 import com.mongodb.util.JSONParseException;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.core.IsEqual;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static junit.framework.Assert.fail;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.core.IsEqual.equalTo;
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -99,8 +105,20 @@ public class MongoPropToOptionTest {
     } else {
       assertTrue( readPreference instanceof TaggableReadPreference );
       assertEquals( JSON.parse( "[" + tagSet + "]" ),
-          ( (TaggableReadPreference) readPreference ).getTagSets() );
+        ( getTagSets( ( (TaggableReadPreference) readPreference ).getTagSetList() ) ) );
     }
+  }
+
+  public List<DBObject> getTagSets( List<TagSet> tagSetList ) {
+    List tags = new ArrayList();
+    for ( TagSet curTags : tagSetList ) {
+      BasicDBObject tagsDocument = new BasicDBObject();
+      for ( Tag curTag : curTags ) {
+        tagsDocument.put( curTag.getName(), curTag.getValue() );
+      }
+      tags.add( tagsDocument );
+    }
+    return tags;
   }
 
   @Test
@@ -147,13 +165,13 @@ public class MongoPropToOptionTest {
 
   @Test
   public void testGetVals() {
-    assertThat( new MongoPropToOption( log ).intValue( "invalid", 123 ), equalTo( 123 ) );
-    assertThat( new MongoPropToOption( log ).intValue( "234", 123 ), equalTo( 234 ) );
-    assertThat( new MongoPropToOption( log ).longValue( "invalid", 123l ), equalTo( 123l ) );
-    assertThat( new MongoPropToOption( log ).longValue( "", 123l ), equalTo( 123l ) );
-    assertThat( new MongoPropToOption( log ).longValue( "234", 123l ), equalTo( 234l ) );
-    assertThat( new MongoPropToOption( log ).boolValue( "", true ), equalTo( true ) );
-    assertThat( new MongoPropToOption( log ).boolValue( "false", true ), equalTo( false ) );
+    assertThat( new MongoPropToOption( log ).intValue( "invalid", 123 ), IsEqual.equalTo( 123 ) );
+    assertThat( new MongoPropToOption( log ).intValue( "234", 123 ), IsEqual.equalTo( 234 ) );
+    assertThat( new MongoPropToOption( log ).longValue( "invalid", 123l ), IsEqual.equalTo( 123l ) );
+    assertThat( new MongoPropToOption( log ).longValue( "", 123l ), IsEqual.equalTo( 123l ) );
+    assertThat( new MongoPropToOption( log ).longValue( "234", 123l ), IsEqual.equalTo( 234l ) );
+    assertThat( new MongoPropToOption( log ).boolValue( "", true ), IsEqual.equalTo( true ) );
+    assertThat( new MongoPropToOption( log ).boolValue( "false", true ), IsEqual.equalTo( false ) );
   }
 
   @Test
@@ -161,7 +179,7 @@ public class MongoPropToOptionTest {
     MongoProperties props = new MongoProperties.Builder().set( MongoProp.writeConcern, "1" ).build();
     MongoPropToOption mongoPropToOption = new MongoPropToOption( log );
     WriteConcern writeConcern = mongoPropToOption.writeConcernValue( props );
-    assertThat( (Integer) writeConcern.getWObject(), equalTo( 1 ) );
+    assertThat( (Integer) writeConcern.getWObject(), IsEqual.equalTo( 1 ) );
   }
 
   @Test
@@ -173,8 +191,8 @@ public class MongoPropToOptionTest {
         .build();
     MongoPropToOption mongoPropToOption = new MongoPropToOption( log );
     WriteConcern writeConcern = mongoPropToOption.writeConcernValue( props );
-    assertThat( (Integer) writeConcern.getWObject(), equalTo( 2 ) );
-    assertThat( writeConcern.getWtimeout(), equalTo( 1010 ) );
+    assertThat( (Integer) writeConcern.getWObject(), IsEqual.equalTo( 2 ) );
+    assertThat( writeConcern.getWtimeout(), IsEqual.equalTo( 1010 ) );
   }
 
   @Test
@@ -188,7 +206,7 @@ public class MongoPropToOptionTest {
     try {
       mongoPropToOption.writeConcernValue( props );
     } catch ( MongoDbException e ) {
-      assertThat( e.getCause(), instanceOf( NumberFormatException.class ) );
+      assertThat( e.getCause(), CoreMatchers.instanceOf( NumberFormatException.class ) );
       return;
     }
     fail( "expected MongoDbException" );
@@ -203,7 +221,7 @@ public class MongoPropToOptionTest {
         .build();
     MongoPropToOption mongoPropToOption = new MongoPropToOption( log );
     WriteConcern wc = mongoPropToOption.writeConcernValue( props );
-    assertThat( wc.getWString(), equalTo( "majority" ) );
+    assertThat( wc.getWString(), IsEqual.equalTo( "majority" ) );
   }
 
   @Test
@@ -213,7 +231,7 @@ public class MongoPropToOptionTest {
             new MongoProperties.Builder()
                 .set( MongoProp.readPreference, "" )
                 .build() ),
-        equalTo( null ) );
+        IsEqual.equalTo( null ) );
   }
 
 }

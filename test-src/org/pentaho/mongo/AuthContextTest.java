@@ -1,5 +1,5 @@
 /*!
-* Copyright 2010 - 2015 Pentaho Corporation.  All rights reserved.
+* Copyright 2010 - 2016 Pentaho Corporation.  All rights reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -17,13 +17,13 @@
 
 package org.pentaho.mongo;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
@@ -53,7 +53,7 @@ public class AuthContextTest {
       authContext.doAs( privExcAction );
       fail();
     } catch ( Exception e ) {
-      assertThat( e, instanceOf( PrivilegedActionException.class ) );
+      assertThat( e, CoreMatchers.instanceOf( PrivilegedActionException.class ) );
     }
     verify( privExcAction ).run();
   }
