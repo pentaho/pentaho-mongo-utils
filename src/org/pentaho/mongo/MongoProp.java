@@ -30,6 +30,10 @@ public enum MongoProp {
 
   // Properties relevant to MongoCredential creation
   /**
+   * Authentication database. The database under which db.createUser() command were executed.
+   */
+  AUTH_DATABASE,
+  /**
    * The user name.  Blank or null in the case of NoAuth.
    */
   USERNAME,
