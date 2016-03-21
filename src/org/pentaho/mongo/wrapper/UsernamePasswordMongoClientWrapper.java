@@ -64,6 +64,7 @@ class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper {
   @Override
   public List<MongoCredential> getCredentialList() {
     List<MongoCredential> credList = new ArrayList<MongoCredential>();
+<<<<<<< HEAD
     String autMecha = props.get( MongoProp.AUTH_MECHA );
     //if not value on AUTH_MECHA set "MONGODB-CR" default authentication mechanism
     if ( autMecha == null ) {
@@ -81,6 +82,21 @@ class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper {
         props.get( MongoProp.AUTH_DB ),
         props.get( MongoProp.PASSWORD ).toCharArray() ) );
     }
+=======
+    if(props.get( MongoProp.AUTH_MECHA).equals( "SCRAM-SHA-1" ))
+    {
+      credList.add( MongoCredential.createScramSha1Credential(
+        props.get( MongoProp.USERNAME ),
+        props.get( MongoProp.AUTH_DB),
+        props.get( MongoProp.PASSWORD ).toCharArray() ) );
+    }
+    else {
+      credList.add( MongoCredential.createCredential(
+        props.get( MongoProp.USERNAME ),
+        props.get( MongoProp.AUTH_DB),
+        props.get( MongoProp.PASSWORD ).toCharArray() ) );
+    }
+>>>>>>> 74d28667ffdb124383c1fba724cf4d93e2ae171e
     return credList;
   }
 }
