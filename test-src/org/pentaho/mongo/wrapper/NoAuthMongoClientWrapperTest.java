@@ -17,7 +17,15 @@
 
 package org.pentaho.mongo.wrapper;
 
-import com.mongodb.*;
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
 import com.mongodb.util.JSON;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +33,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.pentaho.mongo.*;
+import org.pentaho.mongo.BaseMessages;
+import org.pentaho.mongo.MongoDbException;
+import org.pentaho.mongo.MongoProp;
+import org.pentaho.mongo.MongoProperties;
+import org.pentaho.mongo.MongoUtilLogger;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
