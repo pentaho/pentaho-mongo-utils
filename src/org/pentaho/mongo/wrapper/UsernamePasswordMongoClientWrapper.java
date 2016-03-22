@@ -64,9 +64,11 @@ class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper {
   @Override
   public List<MongoCredential> getCredentialList() {
     List<MongoCredential> credList = new ArrayList<MongoCredential>();
+    String authDatabase = props.get( MongoProp.AUTH_DATABASE );
     credList.add( MongoCredential.createCredential(
         props.get( MongoProp.USERNAME ),
-        props.get( MongoProp.DBNAME ),
+        authDatabase == null || authDatabase.equals( "" ) ? // Backward compatibility --Kaa
+            props.get( MongoProp.DBNAME ) : authDatabase,
         props.get( MongoProp.PASSWORD ).toCharArray() ) );
     return credList;
   }

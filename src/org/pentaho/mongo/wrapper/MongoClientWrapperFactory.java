@@ -44,7 +44,9 @@ public class MongoClientWrapperFactory {
     throws MongoDbException {
     if ( props.useKerberos() ) {
       return initKerberosProxy( new KerberosMongoClientWrapper( props, log ) );
-    } else if ( !Util.isEmpty( props.get( MongoProp.USERNAME ) ) || !Util.isEmpty( props.get( MongoProp.PASSWORD ) ) ) {
+    } else if ( !Util.isEmpty( props.get( MongoProp.USERNAME ) )
+        || !Util.isEmpty( props.get( MongoProp.PASSWORD ) )
+        || !Util.isEmpty( props.get( MongoProp.AUTH_DATABASE ) ) ) {
       return new UsernamePasswordMongoClientWrapper( props, log );
     }
     // default
