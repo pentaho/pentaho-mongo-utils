@@ -1,5 +1,5 @@
 /*!
-  * Copyright 2010 - 2015 Pentaho Corporation.  All rights reserved.
+  * Copyright 2010 - 2016 Pentaho Corporation.  All rights reserved.
   *
   * Licensed under the Apache License, Version 2.0 (the "License");
   * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implementation of MongoClientWrapper which uses no credentials.
- * Should only be instantiated by MongoClientWrapperFactory.
+ * Implementation of MongoClientWrapper which uses no credentials. Should only be instantiated by
+ * MongoClientWrapperFactory.
  */
 class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper {
   private final String user;
@@ -65,11 +65,27 @@ class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper {
   public List<MongoCredential> getCredentialList() {
     List<MongoCredential> credList = new ArrayList<MongoCredential>();
     String authDatabase = props.get( MongoProp.AUTH_DATABASE );
-    credList.add( MongoCredential.createCredential(
+    String authMecha = props.get( MongoProp.AUTH_MECHA );
+    //if not value on AUTH_MECHA set "MONGODB-CR" default authentication mechanism
+    if ( authMecha == null ) {
+      authMecha = "";
+    }
+
+    if ( authMecha.equals( "SCRAM-SHA-1" ) ) {
+      credList.add( MongoCredential.createScramSha1Credential(
         props.get( MongoProp.USERNAME ),
-        authDatabase == null || authDatabase.equals( "" ) ? // Backward compatibility --Kaa
+        authDatabase == null || authDatabase.equals( "" )
+          ?
             props.get( MongoProp.DBNAME ) : authDatabase,
         props.get( MongoProp.PASSWORD ).toCharArray() ) );
+    } else {
+      credList.add( MongoCredential.createCredential(
+        props.get( MongoProp.USERNAME ),
+        authDatabase == null || authDatabase.equals( "" ) // Backward compatibility --Kaa
+          ?
+            props.get( MongoProp.DBNAME ) : authDatabase,
+        props.get( MongoProp.PASSWORD ).toCharArray() ) );
+    }
     return credList;
   }
 }

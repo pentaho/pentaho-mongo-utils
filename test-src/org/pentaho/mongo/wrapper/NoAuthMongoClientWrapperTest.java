@@ -1,5 +1,5 @@
 /*!
- * Copyright 2010 - 2014 Pentaho Corporation.  All rights reserved.
+ * Copyright 2010 - 2016 Pentaho Corporation.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,28 @@
 
 package org.pentaho.mongo.wrapper;
 
-import com.mongodb.*;
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
 import com.mongodb.util.JSON;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.pentaho.mongo.*;
+import org.pentaho.mongo.BaseMessages;
+import org.pentaho.mongo.MongoDbException;
+import org.pentaho.mongo.MongoProp;
+import org.pentaho.mongo.MongoProperties;
+import org.pentaho.mongo.MongoUtilLogger;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -34,11 +47,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.*;
-import static org.junit.matchers.JUnitMatchers.containsString;
-import static org.mockito.Mockito.*;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.core.IsEqual;
+import org.junit.Assert;
+import org.junit.matchers.StringContains;
+
 
 public class NoAuthMongoClientWrapperTest {
 
@@ -76,8 +89,8 @@ public class NoAuthMongoClientWrapperTest {
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks( this );
-    when( mongoClientFactory.getMongoClient( anyList(), anyList(),
-        any( MongoClientOptions.class ), anyBoolean() ) )
+    Mockito.when( mongoClientFactory.getMongoClient( Mockito.anyList(), Mockito.anyList(),
+      Mockito.any( MongoClientOptions.class ), Mockito.anyBoolean() ) )
         .thenReturn( mockMongoClient );
     NoAuthMongoClientWrapper.clientFactory = mongoClientFactory;
     noAuthMongoClientWrapper = new NoAuthMongoClientWrapper(
@@ -87,22 +100,22 @@ public class NoAuthMongoClientWrapperTest {
 
   @Test
   public void testPerform() throws Exception {
-    MongoDBAction mockMongoDBAction = mock( MongoDBAction.class );
+    MongoDBAction mockMongoDBAction = Mockito.mock( MongoDBAction.class );
     noAuthMongoClientWrapper.perform( "Test", mockMongoDBAction );
-    verify( mockMongoDBAction, times( 1 ) ).perform( noAuthMongoClientWrapper.getDb( "Test" ) );
+    Mockito.verify( mockMongoDBAction, Mockito.times( 1 ) ).perform( noAuthMongoClientWrapper.getDb( "Test" ) );
   }
 
   @Test
   public void testGetLastErrorMode() throws MongoDbException {
     DBObject config = (DBObject) JSON.parse( REP_SET_CONFIG );
-    DBCollection dbCollection = mock( DBCollection.class );
-    when( dbCollection.findOne() ).thenReturn( config );
-    when( mockMongoClient.getDB( NoAuthMongoClientWrapper.LOCAL_DB ) )
+    DBCollection dbCollection = Mockito.mock( DBCollection.class );
+    Mockito.when( dbCollection.findOne() ).thenReturn( config );
+    Mockito.when( mockMongoClient.getDB( NoAuthMongoClientWrapper.LOCAL_DB ) )
         .thenReturn( mockDB );
-    when( mockDB.getCollection( NoAuthMongoClientWrapper.REPL_SET_COLLECTION ) )
+    Mockito.when( mockDB.getCollection( NoAuthMongoClientWrapper.REPL_SET_COLLECTION ) )
         .thenReturn( dbCollection );
 
-    assertThat( noAuthMongoClientWrapper.getLastErrorModes(), equalTo( Arrays.asList( "DCThree" ) ) );
+    Assert.assertThat( noAuthMongoClientWrapper.getLastErrorModes(), IsEqual.equalTo( Arrays.asList( "DCThree" ) ) );
   }
 
 
@@ -111,9 +124,9 @@ public class NoAuthMongoClientWrapperTest {
     DBObject config = (DBObject) JSON.parse( REP_SET_CONFIG );
     Object members = config.get( NoAuthMongoClientWrapper.REPL_SET_MEMBERS );
 
-    assertTrue( members != null );
-    assertTrue( members instanceof BasicDBList );
-    assertEquals( 3, ( (BasicDBList) members ).size() );
+    Assert.assertTrue( members != null );
+    Assert.assertTrue( members instanceof BasicDBList );
+    Assert.assertEquals( 3, ( (BasicDBList) members ).size() );
   }
 
   @Test
@@ -123,7 +136,7 @@ public class NoAuthMongoClientWrapperTest {
 
     List<String> allTags = noAuthMongoClientWrapper.setupAllTags( (BasicDBList) members );
 
-    assertEquals( 4, allTags.size() );
+    Assert.assertEquals( 4, allTags.size() );
   }
 
   @Test
@@ -138,9 +151,9 @@ public class NoAuthMongoClientWrapperTest {
     List<String> satisfy =
         noAuthMongoClientWrapper.getReplicaSetMembersThatSatisfyTagSets( tagSets );
     // two replica set members have the "use : production" tag in their tag sets
-    assertEquals( 2, satisfy.size() );
-    assertThat( satisfy.get( 0 ), containsString( "palladium.lan:27017" ) );
-    assertThat( satisfy.get( 1 ), containsString( "palladium.local:27019" ) );
+    Assert.assertEquals( 2, satisfy.size() );
+    Assert.assertThat( satisfy.get( 0 ), StringContains.containsString( "palladium.lan:27017" ) );
+    Assert.assertThat( satisfy.get( 1 ), StringContains.containsString( "palladium.local:27019" ) );
   }
 
   @Test
@@ -148,9 +161,9 @@ public class NoAuthMongoClientWrapperTest {
     setupMockedReplSet();
     try {
       noAuthMongoClientWrapper.getReplicaSetMembersThatSatisfyTagSets( null );
-      fail( "expected exception" );
+      Assert.fail( "expected exception" );
     } catch ( Exception e ) {
-      assertThat( e, instanceOf( MongoDbException.class ) );
+      Assert.assertThat( e, CoreMatchers.instanceOf( MongoDbException.class ) );
     }
   }
 
@@ -163,7 +176,7 @@ public class NoAuthMongoClientWrapperTest {
     List<String> satisfy =
         noAuthMongoClientWrapper.getReplicaSetMembersThatSatisfyTagSets( tagSets );
     // no replica set members have the "use : ops" tag in their tag sets
-    assertEquals( 0, satisfy.size() );
+    Assert.assertEquals( 0, satisfy.size() );
   }
 
 
@@ -173,75 +186,75 @@ public class NoAuthMongoClientWrapperTest {
     List<DBObject> tagSets = new ArrayList<DBObject>(); // tags to satisfy
     DBObject tSet = (DBObject) JSON.parse( TAG_SET );
     tagSets.add( tSet );
-    doThrow( runtimeException ).when( mockMongoClient )
+    Mockito.doThrow( runtimeException ).when( mockMongoClient )
         .getDB( NoAuthMongoClientWrapper.LOCAL_DB );
     try {
       noAuthMongoClientWrapper.getReplicaSetMembersThatSatisfyTagSets( tagSets );
-      fail( "expected exception." );
+      Assert.fail( "expected exception." );
     } catch ( Exception e ) {
-      assertThat( e, instanceOf( MongoDbException.class ) );
+      Assert.assertThat( e, CoreMatchers.instanceOf( MongoDbException.class ) );
     }
   }
 
   @Test
   public void testGetClientStandalone() throws MongoDbException, UnknownHostException {
     ServerAddress address = new ServerAddress( "fakehost", 1010 );
-    when( mongoProperties.get( MongoProp.HOST ) ).thenReturn( address.getHost() );
-    when( mongoProperties.get( MongoProp.PORT ) ).thenReturn( "1010" );
-    when( mongoProperties.useAllReplicaSetMembers() ).thenReturn( false );
+    Mockito.when( mongoProperties.get( MongoProp.HOST ) ).thenReturn( address.getHost() );
+    Mockito.when( mongoProperties.get( MongoProp.PORT ) ).thenReturn( "1010" );
+    Mockito.when( mongoProperties.useAllReplicaSetMembers() ).thenReturn( false );
 
     noAuthMongoClientWrapper.getClient( mongoClientOptions );
 
-    verify( mongoClientFactory ).getMongoClient( serverAddresses.capture(), mongoCredentials.capture(),
-        any( MongoClientOptions.class ), eq( false ) );
+    Mockito.verify( mongoClientFactory ).getMongoClient( serverAddresses.capture(), mongoCredentials.capture(),
+      Mockito.any( MongoClientOptions.class ), Mockito.eq( false ) );
 
-    assertThat( serverAddresses.getValue(), equalTo( Arrays.asList( address ) ) );
-    assertThat( "No credentials should be associated w/ NoAuth", mongoCredentials.getValue().size(), equalTo( 0 ) );
+    Assert.assertThat( serverAddresses.getValue(), IsEqual.equalTo( Arrays.asList( address ) ) );
+    Assert.assertThat( "No credentials should be associated w/ NoAuth", mongoCredentials.getValue().size(), IsEqual.equalTo( 0 ) );
   }
 
   @Test
   public void testGetClientRepSet() throws MongoDbException, UnknownHostException {
-    when( mongoProperties.get( MongoProp.HOST ) ).thenReturn( "host1:1010,host2:2020,host3:3030" );
-    when( mongoProperties.useAllReplicaSetMembers() ).thenReturn( true );
+    Mockito.when( mongoProperties.get( MongoProp.HOST ) ).thenReturn( "host1:1010,host2:2020,host3:3030" );
+    Mockito.when( mongoProperties.useAllReplicaSetMembers() ).thenReturn( true );
     noAuthMongoClientWrapper.getClient( mongoClientOptions );
 
-    verify( mongoClientFactory ).getMongoClient( serverAddresses.capture(), mongoCredentials.capture(),
-        eq( mongoClientOptions ), eq( true ) );
+    Mockito.verify( mongoClientFactory ).getMongoClient( serverAddresses.capture(), mongoCredentials.capture(),
+      Mockito.eq( mongoClientOptions ), Mockito.eq( true ) );
 
     List<ServerAddress> addresses = Arrays.asList(
         new ServerAddress( "host1", 1010 ),
         new ServerAddress( "host2", 2020 ),
         new ServerAddress( "host3", 3030 ) );
-    assertThat( serverAddresses.getValue(), equalTo( addresses ) );
+    Assert.assertThat( serverAddresses.getValue(), IsEqual.equalTo( addresses ) );
   }
 
   @Test
   public void testBadHostsAndPorts() throws MongoDbException, UnknownHostException {
-    when( mongoProperties.get( MongoProp.HOST ) ).thenReturn( "host1:1010:2020" );
+    Mockito.when( mongoProperties.get( MongoProp.HOST ) ).thenReturn( "host1:1010:2020" );
     try {
       noAuthMongoClientWrapper.getClient( mongoClientOptions );
-      fail( "expected exception:  malformed host " );
+      Assert.fail( "expected exception:  malformed host " );
     } catch ( MongoDbException e ) {
     }
 
-    when( mongoProperties.get( MongoProp.HOST ) ).thenReturn( "" );
+    Mockito.when( mongoProperties.get( MongoProp.HOST ) ).thenReturn( "" );
     try {
       noAuthMongoClientWrapper.getClient( mongoClientOptions );
-      fail( "expected exception:  empty host string " );
+      Assert.fail( "expected exception:  empty host string " );
     } catch ( MongoDbException e ) {
     }
 
-    when( mongoProperties.get( MongoProp.HOST ) ).thenReturn( "   " );
+    Mockito.when( mongoProperties.get( MongoProp.HOST ) ).thenReturn( "   " );
     try {
       noAuthMongoClientWrapper.getClient( mongoClientOptions );
-      fail( "expected exception:  empty host string " );
+      Assert.fail( "expected exception:  empty host string " );
     } catch ( MongoDbException e ) {
     }
 
-    when( mongoProperties.get( MongoProp.HOST ) ).thenReturn( "host1:badport" );
+    Mockito.when( mongoProperties.get( MongoProp.HOST ) ).thenReturn( "host1:badport" );
     try {
       noAuthMongoClientWrapper.getClient( mongoClientOptions );
-      fail( "expected exception:  bad port " );
+      Assert.fail( "expected exception:  bad port " );
     } catch ( MongoDbException e ) {
     }
   }
@@ -249,101 +262,101 @@ public class NoAuthMongoClientWrapperTest {
   @Test
   public void testConstructorInitializesClientWithProps() throws MongoDbException {
     final AtomicBoolean clientCalled = new AtomicBoolean( false );
-    final MongoClientOptions options = mock( MongoClientOptions.class );
-    when( mongoProperties.buildMongoClientOptions( mockMongoUtilLogger ) )
+    final MongoClientOptions options = Mockito.mock( MongoClientOptions.class );
+    Mockito.when( mongoProperties.buildMongoClientOptions( mockMongoUtilLogger ) )
         .thenReturn( options );
     new NoAuthMongoClientWrapper( mongoProperties, mockMongoUtilLogger ) {
       protected MongoClient getClient( MongoClientOptions opts ) {
         clientCalled.set( true );
-        assertThat( opts, equalTo( options ) );
+        Assert.assertThat( opts, IsEqual.equalTo( options ) );
         return null;
       } };
-    verify( mongoProperties ).buildMongoClientOptions( mockMongoUtilLogger );
-    assertTrue( clientCalled.get() );
+    Mockito.verify( mongoProperties ).buildMongoClientOptions( mockMongoUtilLogger );
+    Assert.assertTrue( clientCalled.get() );
   }
 
   @Test
   public void operationsDelegateToMongoClient() throws MongoDbException {
     noAuthMongoClientWrapper.getDatabaseNames();
-    verify( mockMongoClient ).getDatabaseNames();
+    Mockito.verify( mockMongoClient ).getDatabaseNames();
 
     noAuthMongoClientWrapper.getDb( "foo" );
-    verify( mockMongoClient ).getDB( "foo" );
+    Mockito.verify( mockMongoClient ).getDB( "foo" );
 
-    when( mockMongoClient.getDB( "foo" ) ).thenReturn( mockDB );
+    Mockito.when( mockMongoClient.getDB( "foo" ) ).thenReturn( mockDB );
     noAuthMongoClientWrapper.getCollectionsNames( "foo" );
-    verify( mockDB ).getCollectionNames();
+    Mockito.verify( mockDB ).getCollectionNames();
   }
 
   @Test
   public void mongoExceptionsPropogate() {
-    doThrow( runtimeException ).when( mockMongoClient ).getDatabaseNames();
+    Mockito.doThrow( runtimeException ).when( mockMongoClient ).getDatabaseNames();
     try {
       noAuthMongoClientWrapper.getDatabaseNames();
-      fail( "expected exception" );
+      Assert.fail( "expected exception" );
     } catch ( Exception mde ) {
-      assertThat( mde, instanceOf( MongoDbException.class ) );
+      Assert.assertThat( mde, CoreMatchers.instanceOf( MongoDbException.class ) );
     }
-    doThrow( runtimeException ).when( mockMongoClient ).getDB( "foo" );
+    Mockito.doThrow( runtimeException ).when( mockMongoClient ).getDB( "foo" );
     try {
       noAuthMongoClientWrapper.getDb( "foo" );
-      fail( "expected exception" );
+      Assert.fail( "expected exception" );
     } catch ( Exception mde ) {
-      assertThat( mde, instanceOf( MongoDbException.class ) );
+      Assert.assertThat( mde, CoreMatchers.instanceOf( MongoDbException.class ) );
     }
 
   }
 
   @Test
   public void mongoGetCollNamesExceptionPropgates() {
-    when( mockMongoClient.getDB( "foo" ) ).thenReturn( mockDB );
-    doThrow( runtimeException ).when( mockDB ).getCollectionNames();
+    Mockito.when( mockMongoClient.getDB( "foo" ) ).thenReturn( mockDB );
+    Mockito.doThrow( runtimeException ).when( mockDB ).getCollectionNames();
     try {
       noAuthMongoClientWrapper.getCollectionsNames( "foo" );
-      fail( "expected exception" );
+      Assert.fail( "expected exception" );
     } catch ( Exception mde ) {
-      assertThat( mde, instanceOf( MongoDbException.class ) );
+      Assert.assertThat( mde, CoreMatchers.instanceOf( MongoDbException.class ) );
     }
   }
 
   @Test
   public void testGetIndex() throws MongoDbException {
-    when( mockMongoClient.getDB( "fakeDb" ) ).thenReturn( mockDB );
-    when( mockDB.collectionExists( "collection" ) ).thenReturn( true );
-    DBCollection collection = mock( DBCollection.class );
-    DBObject indexInfoObj = mock( DBObject.class );
-    when( indexInfoObj.toString() ).thenReturn( "indexInfo" );
+    Mockito.when( mockMongoClient.getDB( "fakeDb" ) ).thenReturn( mockDB );
+    Mockito.when( mockDB.collectionExists( "collection" ) ).thenReturn( true );
+    DBCollection collection = Mockito.mock( DBCollection.class );
+    DBObject indexInfoObj = Mockito.mock( DBObject.class );
+    Mockito.when( indexInfoObj.toString() ).thenReturn( "indexInfo" );
     List<DBObject> indexInfo = Arrays.asList( indexInfoObj );
-    when( collection.getIndexInfo() ).thenReturn( indexInfo );
-    when( mockDB.getCollection( "collection" ) ).thenReturn( collection );
+    Mockito.when( collection.getIndexInfo() ).thenReturn( indexInfo );
+    Mockito.when( mockDB.getCollection( "collection" ) ).thenReturn( collection );
 
-    assertThat( noAuthMongoClientWrapper.getIndexInfo( "fakeDb", "collection" ),
-        equalTo( Arrays.asList( "indexInfo" ) ) );
+    Assert.assertThat( noAuthMongoClientWrapper.getIndexInfo( "fakeDb", "collection" ),
+      IsEqual.equalTo( Arrays.asList( "indexInfo" ) ) );
   }
 
   @Test
   public void testGetIndexCollectionDoesntExist() throws MongoDbException {
-    when( mockMongoClient.getDB( "fakeDb" ) ).thenReturn( mockDB );
-    when( mockDB.collectionExists( "collection" ) ).thenReturn( false );
-    DBCollection collection = mock( DBCollection.class );
-    DBObject indexInfoObj = mock( DBObject.class );
-    when( indexInfoObj.toString() ).thenReturn( "indexInfo" );
+    Mockito.when( mockMongoClient.getDB( "fakeDb" ) ).thenReturn( mockDB );
+    Mockito.when( mockDB.collectionExists( "collection" ) ).thenReturn( false );
+    DBCollection collection = Mockito.mock( DBCollection.class );
+    DBObject indexInfoObj = Mockito.mock( DBObject.class );
+    Mockito.when( indexInfoObj.toString() ).thenReturn( "indexInfo" );
     List<DBObject> indexInfo = Arrays.asList( indexInfoObj );
-    when( collection.getIndexInfo() ).thenReturn( indexInfo );
-    when( mockDB.getCollection( "collection" ) ).thenReturn( collection );
-    assertThat( noAuthMongoClientWrapper.getIndexInfo( "fakeDb", "collection" ),
-        equalTo( Arrays.asList( "indexInfo" ) ) );
-    verify( mockDB ).createCollection( "collection", null );
+    Mockito.when( collection.getIndexInfo() ).thenReturn( indexInfo );
+    Mockito.when( mockDB.getCollection( "collection" ) ).thenReturn( collection );
+    Assert.assertThat( noAuthMongoClientWrapper.getIndexInfo( "fakeDb", "collection" ),
+      IsEqual.equalTo( Arrays.asList( "indexInfo" ) ) );
+    Mockito.verify( mockDB ).createCollection( "collection", null );
   }
 
   @Test
   public void testGetIndexCollectionNotSpecified() throws MongoDbException {
-    when( mockMongoClient.getDB( "fakeDb" ) ).thenReturn( mockDB );
+    Mockito.when( mockMongoClient.getDB( "fakeDb" ) ).thenReturn( mockDB );
     try {
       noAuthMongoClientWrapper.getIndexInfo( "fakeDb", "" );
-      fail( "expected exception" );
+      Assert.fail( "expected exception" );
     } catch ( Exception e ) {
-      assertThat( e, instanceOf( MongoDbException.class ) );
+      Assert.assertThat( e, CoreMatchers.instanceOf( MongoDbException.class ) );
     }
   }
 
@@ -351,23 +364,23 @@ public class NoAuthMongoClientWrapperTest {
   public void getIndexInfoErrorConditions() {
     try {
       noAuthMongoClientWrapper.getIndexInfo( "fakeDb", "collection" );
-      fail( "expected exception since DB is null" );
+      Assert.fail( "expected exception since DB is null" );
     } catch ( Exception e ) {
     }
     try {
       noAuthMongoClientWrapper.getIndexInfo( "fakeDb", "" );
-      fail( "expected exception since no collection specified." );
+      Assert.fail( "expected exception since no collection specified." );
     } catch ( Exception e ) {
     }
-    when( mockMongoClient.getDB( "fakeDb" ) ).thenReturn( mockDB );
-    when( mockDB.collectionExists( "collection" ) ).thenReturn( true );
+    Mockito.when( mockMongoClient.getDB( "fakeDb" ) ).thenReturn( mockDB );
+    Mockito.when( mockDB.collectionExists( "collection" ) ).thenReturn( true );
     try {
       noAuthMongoClientWrapper.getIndexInfo( "fakeDb", "collection" );
-      fail( "expected exception since null collection" );
+      Assert.fail( "expected exception since null collection" );
     } catch ( Exception e ) {
-      verify( mockDB ).getCollection( "collection" );
-      assertThat( e.getMessage(),
-          containsString( BaseMessages.getString( PKG,
+      Mockito.verify( mockDB ).getCollection( "collection" );
+      Assert.assertThat( e.getMessage(),
+        StringContains.containsString( BaseMessages.getString( PKG,
               "MongoNoAuthWrapper.ErrorMessage.UnableToGetInfoForCollection",
               "collection" ) ) );
     }
@@ -378,80 +391,80 @@ public class NoAuthMongoClientWrapperTest {
     initFakeDb();
     try {
       noAuthMongoClientWrapper.getIndexInfo( "fakeDb", "collection" );
-      fail( "expected exception since no index info" );
+      Assert.fail( "expected exception since no index info" );
     } catch ( Exception e ) {
-      verify( mockDB ).getCollection( "collection" );
-      assertThat( e.getMessage(),
-          containsString( BaseMessages.getString( PKG,
+      Mockito.verify( mockDB ).getCollection( "collection" );
+      Assert.assertThat( e.getMessage(),
+        StringContains.containsString( BaseMessages.getString( PKG,
               "MongoNoAuthWrapper.ErrorMessage.UnableToGetInfoForCollection",
               "collection" ) ) );
     }
   }
 
   private void initFakeDb() {
-    when( mockMongoClient.getDB( "fakeDb" ) ).thenReturn( mockDB );
-    when( mockDB.collectionExists( "collection" ) ).thenReturn( true );
-    when( mockDB.getCollection( "collection" ) ).thenReturn( collection );
+    Mockito.when( mockMongoClient.getDB( "fakeDb" ) ).thenReturn( mockDB );
+    Mockito.when( mockDB.collectionExists( "collection" ) ).thenReturn( true );
+    Mockito.when( mockDB.getCollection( "collection" ) ).thenReturn( collection );
   }
 
   @Test
   public void testGetAllTagsNoDB() throws MongoDbException {
     List<String> tags = noAuthMongoClientWrapper.getAllTags();
-    verify( mockMongoUtilLogger ).info(
+    Mockito.verify( mockMongoUtilLogger ).info(
         BaseMessages.getString( PKG, "MongoNoAuthWrapper.Message.Warning.LocalDBNotAvailable" ) );
-    assertThat( tags.size(), equalTo( 0 ) );
+    Assert.assertThat( tags.size(), IsEqual.equalTo( 0 ) );
   }
 
   @Test
   public void testGetAllTagsNoRepSet() throws MongoDbException {
-    when( mockMongoClient.getDB( NoAuthMongoClientWrapper.LOCAL_DB ) ).thenReturn( mockDB );
+    Mockito.when( mockMongoClient.getDB( NoAuthMongoClientWrapper.LOCAL_DB ) ).thenReturn( mockDB );
     List<String> tags = noAuthMongoClientWrapper.getAllTags();
-    verify( mockMongoUtilLogger ).info(
+    Mockito.verify( mockMongoUtilLogger ).info(
         BaseMessages.getString( PKG,
             "MongoNoAuthWrapper.Message.Warning.ReplicaSetCollectionUnavailable" ) );
-    assertThat( tags.size(), equalTo( 0 ) );
+    Assert.assertThat( tags.size(), IsEqual.equalTo( 0 ) );
   }
 
   @Test
   public void testGetAllTagsRepSetEmtpy() throws MongoDbException {
-    when( mockMongoClient.getDB( NoAuthMongoClientWrapper.LOCAL_DB ) ).thenReturn( mockDB );
-    when( mockDB.getCollection( NoAuthMongoClientWrapper.REPL_SET_COLLECTION ) )
+    Mockito.when( mockMongoClient.getDB( NoAuthMongoClientWrapper.LOCAL_DB ) ).thenReturn( mockDB );
+    Mockito.when( mockDB.getCollection( NoAuthMongoClientWrapper.REPL_SET_COLLECTION ) )
         .thenReturn( collection );
     DBObject membersList = new BasicDBList();
     DBObject basicDBObject = new BasicDBObject( NoAuthMongoClientWrapper.REPL_SET_MEMBERS, membersList );
-    when( collection.findOne() ).thenReturn( basicDBObject );
+    Mockito.when( collection.findOne() ).thenReturn( basicDBObject );
     List<String> tags = noAuthMongoClientWrapper.getAllTags();
-    verify( mockMongoUtilLogger ).info(
+    Mockito.verify( mockMongoUtilLogger ).info(
         BaseMessages.getString( PKG,
             "MongoNoAuthWrapper.Message.Warning.NoReplicaSetMembersDefined" ) );
-    assertThat( tags.size(), equalTo( 0 ) );
+    Assert.assertThat( tags.size(), IsEqual.equalTo( 0 ) );
   }
 
   @Test
   public void testGetAllTagsRepSetNull() throws MongoDbException {
-    when( mockMongoClient.getDB( NoAuthMongoClientWrapper.LOCAL_DB ) ).thenReturn( mockDB );
-    when( mockDB.getCollection( NoAuthMongoClientWrapper.REPL_SET_COLLECTION ) )
+    Mockito.when( mockMongoClient.getDB( NoAuthMongoClientWrapper.LOCAL_DB ) ).thenReturn( mockDB );
+    Mockito.when( mockDB.getCollection( NoAuthMongoClientWrapper.REPL_SET_COLLECTION ) )
         .thenReturn( collection );
-    when( collection.findOne() ).thenReturn( null );
+    Mockito.when( collection.findOne() ).thenReturn( null );
     List<String> tags = noAuthMongoClientWrapper.getAllTags();
-    verify( mockMongoUtilLogger ).info(
+    Mockito.verify( mockMongoUtilLogger ).info(
         BaseMessages.getString( PKG,
             "MongoNoAuthWrapper.Message.Warning.NoReplicaSetMembersDefined" ) );
-    assertThat( tags.size(), equalTo( 0 ) );
+    Assert.assertThat( tags.size(), IsEqual.equalTo( 0 ) );
   }
 
   @Test
   public void testGetAllTagsRepSetUnexpectedType() throws MongoDbException {
-    when( mockMongoClient.getDB( NoAuthMongoClientWrapper.LOCAL_DB ) ).thenReturn( mockDB );
-    when( mockDB.getCollection( NoAuthMongoClientWrapper.REPL_SET_COLLECTION ) )
+    Mockito.when( mockMongoClient.getDB( NoAuthMongoClientWrapper.LOCAL_DB ) ).thenReturn( mockDB );
+    Mockito.when( mockDB.getCollection( NoAuthMongoClientWrapper.REPL_SET_COLLECTION ) )
         .thenReturn( collection );
-    DBObject dbObj = mock( DBObject.class );
-    when( collection.findOne() ).thenReturn( dbObj );
+    DBObject dbObj = Mockito.mock( DBObject.class );
+    Mockito.when( collection.findOne() ).thenReturn( dbObj );
     List<String> tags = noAuthMongoClientWrapper.getAllTags();
-    verify( mockMongoUtilLogger ).info(
+    Mockito.verify( mockMongoUtilLogger ).info(
         BaseMessages.getString( PKG,
             "MongoNoAuthWrapper.Message.Warning.NoReplicaSetMembersDefined" ) );
-    assertThat( tags.size(), equalTo( 0 ) );
+    Assert.assertThat( tags.size(), IsEqual.equalTo( 0 ) );
   }
 
   @Test
@@ -459,7 +472,7 @@ public class NoAuthMongoClientWrapperTest {
     setupMockedReplSet();
     List<String> tags = noAuthMongoClientWrapper.getAllTags();
     Collections.sort( tags, String.CASE_INSENSITIVE_ORDER );
-    assertThat( tags, equalTo( Arrays
+    Assert.assertThat( tags, IsEqual.equalTo( Arrays
             .asList( "\"dc.one\" : \"primary\"",
                 "\"dc.three\" : \"slave2\"",
                 "\"dc.two\" : \"slave1\"",
@@ -470,29 +483,29 @@ public class NoAuthMongoClientWrapperTest {
   public void testGetCreateCollection() throws MongoDbException {
     initFakeDb();
     noAuthMongoClientWrapper.getCollection( "fakeDb", "collection" );
-    verify( mockDB ).getCollection( "collection" );
+    Mockito.verify( mockDB ).getCollection( "collection" );
     noAuthMongoClientWrapper.createCollection( "fakeDb", "newCollection" );
-    verify( mockDB ).createCollection( "newCollection", null );
+    Mockito.verify( mockDB ).createCollection( "newCollection", null );
   }
 
   @Test
   public void testClientDelegation() {
     noAuthMongoClientWrapper.dispose();
-    verify( mockMongoClient ).close();
+    Mockito.verify( mockMongoClient ).close();
     noAuthMongoClientWrapper.getReplicaSetStatus();
-    verify( mockMongoClient ).getReplicaSetStatus();
+    Mockito.verify( mockMongoClient ).getReplicaSetStatus();
   }
 
 
 
   private void setupMockedReplSet() {
-    when( mockMongoClient.getDB( NoAuthMongoClientWrapper.LOCAL_DB ) ).thenReturn( mockDB );
-    when( mockDB.getCollection( NoAuthMongoClientWrapper.REPL_SET_COLLECTION ) )
+    Mockito.when( mockMongoClient.getDB( NoAuthMongoClientWrapper.LOCAL_DB ) ).thenReturn( mockDB );
+    Mockito.when( mockDB.getCollection( NoAuthMongoClientWrapper.REPL_SET_COLLECTION ) )
         .thenReturn( collection );
     DBObject config = (DBObject) JSON.parse( REP_SET_CONFIG );
     Object members = config.get( NoAuthMongoClientWrapper.REPL_SET_MEMBERS );
     DBObject basicDBObject = new BasicDBObject( NoAuthMongoClientWrapper.REPL_SET_MEMBERS, members );
-    when( collection.findOne() ).thenReturn( basicDBObject );
+    Mockito.when( collection.findOne() ).thenReturn( basicDBObject );
   }
 
 
