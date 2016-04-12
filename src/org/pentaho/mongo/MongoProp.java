@@ -1,5 +1,5 @@
 /*!
-  * Copyright 2010 - 2014 Pentaho Corporation.  All rights reserved.
+  * Copyright 2010 - 2016 Pentaho Corporation.  All rights reserved.
   *
   * Licensed under the Apache License, Version 2.0 (the "License");
   * you may not use this file except in compliance with the License.
@@ -216,8 +216,11 @@ public enum MongoProp {
   /**
    * Specifies the write timeout in millis for the WriteConcern.
    */
-  wTimeout;
-
+  wTimeout,
+  /**
+   * MongoDB 3.0 changed the default authentication mechanism from MONGODB-CR to SCRAM-SHA-1
+   */
+  AUTH_MECHA;
 
   public void setOption( MongoClientOptions.Builder builder, MongoProperties props, MongoPropToOption propToOption )
     throws MongoDbException {

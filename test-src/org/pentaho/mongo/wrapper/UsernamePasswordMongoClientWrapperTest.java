@@ -1,3 +1,20 @@
+/*!
+ * Copyright 2010 - 2016 Pentaho Corporation.  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 package org.pentaho.mongo.wrapper;
 
 import com.mongodb.MongoCredential;
@@ -114,5 +131,31 @@ public class UsernamePasswordMongoClientWrapperTest {
     Assert.assertEquals( dbName, credentials.get( 0 ).getSource() );
     Assert.assertArrayEquals( password.toCharArray(), credentials.get( 0 ).getPassword() );
   }
+
+  @Test
+  public void getCredentialAuthMechanism() throws Exception {
+    final String username = "testuser";
+    final String password = "testpass";
+    final String dbName = "database";
+    final String authMecha = "SCRAM-SHA-1";
+
+    // MongoProp.AUTH_DATABASE is null
+    mongoPropertiesBuilder = new MongoProperties.Builder()
+      .set( MongoProp.USERNAME, username )
+      .set( MongoProp.PASSWORD, password )
+      .set( MongoProp.AUTH_DATABASE, "" )
+      .set( MongoProp.DBNAME, dbName )
+      .set( MongoProp.AUTH_MECHA, authMecha );
+
+    UsernamePasswordMongoClientWrapper mongoClientWrapper =
+      new UsernamePasswordMongoClientWrapper( mongoPropertiesBuilder.build(), log );
+    List<MongoCredential> credentials = mongoClientWrapper.getCredentialList();
+    Assert.assertEquals( 1, credentials.size() );
+    Assert.assertEquals( authMecha, credentials.get( 0 ).getMechanism() );
+    Assert.assertEquals( username, credentials.get( 0 ).getUserName() );
+    Assert.assertEquals( dbName, credentials.get( 0 ).getSource() );
+    Assert.assertArrayEquals( password.toCharArray(), credentials.get( 0 ).getPassword() );
+  }
+
 
 }
