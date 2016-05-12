@@ -26,7 +26,6 @@ import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
 import com.mongodb.ReplicaSetStatus;
 import com.mongodb.ServerAddress;
-
 import org.pentaho.mongo.BaseMessages;
 import org.pentaho.mongo.MongoDbException;
 import org.pentaho.mongo.MongoProp;
@@ -36,7 +35,6 @@ import org.pentaho.mongo.Util;
 import org.pentaho.mongo.wrapper.collection.DefaultMongoCollectionWrapper;
 import org.pentaho.mongo.wrapper.collection.MongoCollectionWrapper;
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -56,7 +54,7 @@ class NoAuthMongoClientWrapper implements MongoClientWrapper {
   public static final String REPL_SET_LAST_ERROR_MODES = "getLastErrorModes"; //$NON-NLS-1$
   public static final String REPL_SET_MEMBERS = "members"; //$NON-NLS-1$
 
-  static MongoClientFactory clientFactory = new MongoClientFactory();
+  static MongoClientFactory clientFactory = new DefaultMongoClientFactory();
 
   private final MongoClient mongo;
   private final MongoUtilLogger log;
@@ -133,7 +131,7 @@ class NoAuthMongoClientWrapper implements MongoClientWrapper {
       try {
         ServerAddress s = new ServerAddress( host, port );
         serverList.add( s );
-      } catch ( UnknownHostException u ) {
+      } catch ( Throwable u ) {
         throw new MongoDbException( u );
       }
     }
@@ -153,9 +151,9 @@ class NoAuthMongoClientWrapper implements MongoClientWrapper {
           MongoClientWrapper.class,
           "MongoNoAuthWrapper.Message.Error.NoHostSet" ) );
     }
-    return clientFactory
-        .getMongoClient( serverAddressList, credList, opts,
-            props.useAllReplicaSetMembers() );
+    return getClientFactory( props )
+      .getMongoClient( serverAddressList, credList, opts,
+        props.useAllReplicaSetMembers() );
   }
 
 
@@ -501,5 +499,9 @@ class NoAuthMongoClientWrapper implements MongoClientWrapper {
   @Override
   public <ReturnType> ReturnType perform( String db, MongoDBAction<ReturnType> action ) throws MongoDbException {
     return action.perform( getDb( db ) );
+  }
+
+  public MongoClientFactory getClientFactory( MongoProperties opts ) {
+    return clientFactory;
   }
 }

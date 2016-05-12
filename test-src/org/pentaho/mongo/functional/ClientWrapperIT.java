@@ -1,5 +1,5 @@
 /*!
- * Copyright 2010 - 2014 Pentaho Corporation.  All rights reserved.
+ * Copyright 2010 - 2016 Pentaho Corporation.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
-import static org.pentaho.mongo.MongoProp.*;
 
 @RunWith( value = Parameterized.class )
 public class ClientWrapperIT extends TestBase {
@@ -56,6 +55,7 @@ public class ClientWrapperIT extends TestBase {
 
   private final List<String> tempCollections = new ArrayList<String>();
   private MongoClientWrapper clientWrapper;
+
   public ClientWrapperIT( MongoProperties props ) {
     this.props = props;
   }
@@ -72,88 +72,88 @@ public class ClientWrapperIT extends TestBase {
     }
     for ( String tempCollection : tempCollections ) {
       // fail safe drop of tempCollection
-      clientWrapper.getCollection( props.get( DBNAME ), tempCollection ).drop();
+      clientWrapper.getCollection( props.get( MongoProp.DBNAME ), tempCollection ).drop();
     }
     tempCollections.clear();
 
   }
 
   /**
-   * Returns the test data used for each run.  Test methods will be run
-   * repeatedly, once for each MongoProperties in the array returned by this method.
+   * Returns the test data used for each run.  Test methods will be run repeatedly, once for each MongoProperties in the
+   * array returned by this method.
    */
   @Parameterized.Parameters
   public static Collection<MongoProperties[]> data() {
     return Arrays.asList( new MongoProperties[][] {
       { // KERBEROS
         new MongoProperties.Builder()
-          .set( HOST, (String) testProperties.get( "single.server.host" ) )
-          .set( USERNAME, (String) testProperties.get( "kerberos.user" ) )
-          .set( DBNAME, (String) testProperties.get( "test.db" ) )
-          .set( USE_KERBEROS, "true" ).build() } ,
+          .set( MongoProp.HOST, (String) testProperties.get( "single.server.host" ) )
+          .set( MongoProp.USERNAME, (String) testProperties.get( "kerberos.user" ) )
+          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
+          .set( MongoProp.USE_KERBEROS, "true" ).build() },
       { // KERBEROS keytab
         new MongoProperties.Builder()
-          .set( HOST, (String) testProperties.get( "single.server.host" ) )
-          .set( USERNAME, (String) testProperties.get( "kerberos.user" ) )
-          .set( PENTAHO_JAAS_KEYTAB_FILE, (String) testProperties.get( "kerberos.keytab" ) )
-          .set( DBNAME, (String) testProperties.get( "test.db" ) )
-          .set( PENTAHO_JAAS_AUTH_MODE, "KERBEROS_KEYTAB" )
-          .set( USE_KERBEROS, "true" ).build() } ,
+          .set( MongoProp.HOST, (String) testProperties.get( "single.server.host" ) )
+          .set( MongoProp.USERNAME, (String) testProperties.get( "kerberos.user" ) )
+          .set( MongoProp.PENTAHO_JAAS_KEYTAB_FILE, (String) testProperties.get( "kerberos.keytab" ) )
+          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
+          .set( MongoProp.PENTAHO_JAAS_AUTH_MODE, "KERBEROS_KEYTAB" )
+          .set( MongoProp.USE_KERBEROS, "true" ).build() },
       { // single server CR
         new MongoProperties.Builder()
-          .set( HOST, (String) testProperties.get( "single.server.host" ) )
-          .set( PORT, (String) testProperties.get( "userpass.auth.port" ) )
-          .set( USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
-          .set( PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
-          .set( DBNAME, (String) testProperties.get( "test.db" ) ).build() },
+          .set( MongoProp.HOST, (String) testProperties.get( "single.server.host" ) )
+          .set( MongoProp.PORT, (String) testProperties.get( "userpass.auth.port" ) )
+          .set( MongoProp.USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
+          .set( MongoProp.PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
+          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) ).build() },
       { // multi-server CR
         new MongoProperties.Builder()
-          .set( HOST, (String) testProperties.get( "multiserver.host" ) )
-          .set( USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
-          .set( PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
-          .set( DBNAME, (String) testProperties.get( "test.db" ) )
-          .set( connectionsPerHost, "100" )
-          .set( connectTimeout, "10000" )
-          .set( maxWaitTime, "12000" )
-          .set( readPreference, "primary" )
-          .set( cursorFinalizerEnabled, "true" )
-          .set( socketKeepAlive, "false" )
-          .set( socketTimeout, "0" ).build() },
+          .set( MongoProp.HOST, (String) testProperties.get( "multiserver.host" ) )
+          .set( MongoProp.USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
+          .set( MongoProp.PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
+          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
+          .set( MongoProp.connectionsPerHost, "100" )
+          .set( MongoProp.connectTimeout, "10000" )
+          .set( MongoProp.maxWaitTime, "12000" )
+          .set( MongoProp.readPreference, "primary" )
+          .set( MongoProp.cursorFinalizerEnabled, "true" )
+          .set( MongoProp.socketKeepAlive, "false" )
+          .set( MongoProp.socketTimeout, "0" ).build() },
       { // secondary read pref CR
         new MongoProperties.Builder()
-          .set( HOST, (String) testProperties.get( "multiserver.host" ) )
-          .set( USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
-          .set( PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
-          .set( DBNAME, (String) testProperties.get( "test.db" ) )
-          .set( readPreference, "secondary" )
-          .set( writeConcern, Integer.toString( NUM_MONGOS ) )
-          .set( cursorFinalizerEnabled, "true" ).build() } ,
+          .set( MongoProp.HOST, (String) testProperties.get( "multiserver.host" ) )
+          .set( MongoProp.USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
+          .set( MongoProp.PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
+          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
+          .set( MongoProp.readPreference, "secondary" )
+          .set( MongoProp.writeConcern, Integer.toString( NUM_MONGOS ) )
+          .set( MongoProp.cursorFinalizerEnabled, "true" ).build() },
       { // secondary read pref CR with tag set1
         new MongoProperties.Builder()
-          .set( HOST, (String) testProperties.get( "multiserver.host" ) )
-          .set( USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
-          .set( PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
-          .set( DBNAME, (String) testProperties.get( "test.db" ) )
-          .set( readPreference, "secondary" )
-          .set( tagSet, (String) testProperties.get( "tagset1" ) )
-          .set( writeConcern, Integer.toString( NUM_MONGOS ) ).build() } ,
+          .set( MongoProp.HOST, (String) testProperties.get( "multiserver.host" ) )
+          .set( MongoProp.USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
+          .set( MongoProp.PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
+          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
+          .set( MongoProp.readPreference, "secondary" )
+          .set( MongoProp.tagSet, (String) testProperties.get( "tagset1" ) )
+          .set( MongoProp.writeConcern, Integer.toString( NUM_MONGOS ) ).build() },
       { // secondary read pref CR with tag set2
         new MongoProperties.Builder()
-          .set( HOST, (String) testProperties.get( "multiserver.host" ) )
-          .set( USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
-          .set( PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
-          .set( DBNAME, (String) testProperties.get( "test.db" ) )
-          .set( readPreference, "secondary" )
-          .set( tagSet, (String) testProperties.get( "tagset2" ) )
-          .set( writeConcern, Integer.toString( NUM_MONGOS ) ).build() } ,
+          .set( MongoProp.HOST, (String) testProperties.get( "multiserver.host" ) )
+          .set( MongoProp.USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
+          .set( MongoProp.PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
+          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
+          .set( MongoProp.readPreference, "secondary" )
+          .set( MongoProp.tagSet, (String) testProperties.get( "tagset2" ) )
+          .set( MongoProp.writeConcern, Integer.toString( NUM_MONGOS ) ).build() },
       { // SSL turned on
         new MongoProperties.Builder()
-          .set( HOST, (String) testProperties.get( "ssl.host" ) )
-          .set( USERNAME, (String) testProperties.get( "ssl.user" ) )
-          .set( PASSWORD, (String) testProperties.get( "ssl.password" ) )
-          .set( DBNAME, (String) testProperties.get( "test.db" ) )
-          .set( USE_ALL_REPLICA_SET_MEMBERS, "false" )
-          .set( useSSL, "true" ).build() }
+          .set( MongoProp.HOST, (String) testProperties.get( "ssl.host" ) )
+          .set( MongoProp.USERNAME, (String) testProperties.get( "ssl.user" ) )
+          .set( MongoProp.PASSWORD, (String) testProperties.get( "ssl.password" ) )
+          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
+          .set( MongoProp.USE_ALL_REPLICA_SET_MEMBERS, "false" )
+          .set( MongoProp.useSSL, "true" ).build() }
     } );
   }
 
@@ -161,7 +161,7 @@ public class ClientWrapperIT extends TestBase {
   @Test
   public void testReadPref() throws MongoDbException {
     // validate the expected server based on read preference specification.
-    if ( !props.useAllReplicaSetMembers() && !( props.get( HOST ).split( "," ).length > 1 ) ) {
+    if ( !props.useAllReplicaSetMembers() && !( props.get( MongoProp.HOST ).split( "," ).length > 1 ) ) {
       // not using replica sets, nothing to validate.
       return;
     }
@@ -171,20 +171,20 @@ public class ClientWrapperIT extends TestBase {
     if ( status == null ) {
       // status should be non-null if using replica sets, which will be true
       // if either the property is set to TRUE, or more than one HOST specified.
-      fail( "Could not retrieve replica set status with properties:  "  + props );
+      fail( "Could not retrieve replica set status with properties:  " + props );
     }
-    final ServerAddress primary = status.getMaster();
-    final MongoCursorWrapper cursor = wrapper.getCollection( props.get( DBNAME ), "sales" ).find();
+
+    final MongoCursorWrapper cursor = wrapper.getCollection( props.get( MongoProp.DBNAME ), "sales" ).find();
 
     cursor.next();
     ServerAddress readServer = cursor.getServerAddress();
 
     if ( props.getReadPreference() == ReadPreference.primary() ) {
       assertTrue( "Using primary read preference, but cursor reading from non-primary. \n" + props,
-        primary.equals( readServer ) );
+        wrapper.getReplicaSetStatus().getMaster().equals( readServer ) );
     } else if ( props.getReadPreference() == ReadPreference.secondary() ) {
 
-      validateSecondary( wrapper, primary, readServer );
+      validateSecondary( wrapper, wrapper.getReplicaSetStatus().getMaster(), readServer );
 
     }
     wrapper.dispose();
@@ -228,8 +228,8 @@ public class ClientWrapperIT extends TestBase {
     clientWrapper = getWrapper( props );
     String tempCollection = "testCollection" + UUID.randomUUID().toString().replace( "-", "" );
     tempCollections.add( tempCollection );
-    clientWrapper.createCollection( props.get( DBNAME ), tempCollection );
-    MongoCollectionWrapper collectionWrapper = clientWrapper.getCollection( props.get( DBNAME ), tempCollection );
+    clientWrapper.createCollection( props.get( MongoProp.DBNAME ), tempCollection );
+    MongoCollectionWrapper collectionWrapper = clientWrapper.getCollection( props.get( MongoProp.DBNAME ), tempCollection );
 
     List<DBObject> dbObjects = new ArrayList<DBObject>();
     dbObjects.add( new BasicDBObject( "foo", "bar" ) );
@@ -242,7 +242,7 @@ public class ClientWrapperIT extends TestBase {
     collectionWrapper.drop();
     tempCollections.remove( tempCollection );
     assertFalse( props.toString(),
-      clientWrapper.getCollectionsNames( props.get( DBNAME ) ).contains( tempCollection ) );
+      clientWrapper.getCollectionsNames( props.get( MongoProp.DBNAME ) ).contains( tempCollection ) );
   }
 
   @Test
@@ -255,9 +255,9 @@ public class ClientWrapperIT extends TestBase {
 
     String tempCollection = "testCollection" + UUID.randomUUID().toString().replace( "-", "" );
     tempCollections.add( tempCollection );
-    clientWrapper.createCollection( props.get( DBNAME ), tempCollection );
+    clientWrapper.createCollection( props.get( MongoProp.DBNAME ), tempCollection );
     MongoCollectionWrapper collectionWrapper = clientWrapper.getCollection(
-      props.get( DBNAME ), tempCollection );
+      props.get( MongoProp.DBNAME ), tempCollection );
 
     List<DBObject> dbObjects = new ArrayList<DBObject>();
     for ( int i = 0; i < 100; i++ ) {
@@ -275,9 +275,9 @@ public class ClientWrapperIT extends TestBase {
     }
     assertEquals( "Should be limited to 10 items", 10, i );
 
-    clientWrapper.getCollection( props.get( DBNAME ), tempCollection ).drop();
+    clientWrapper.getCollection( props.get( MongoProp.DBNAME ), tempCollection ).drop();
     tempCollections.remove( tempCollection );
-    String host = props.get( HOST );
+    String host = props.get( MongoProp.HOST );
     if ( host != null && !( host.split( "," ).length > 1 ) ) {
       // can't assert a specific host or port if multiple servers specified.
       assertEquals( props.toString(),

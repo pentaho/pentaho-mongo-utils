@@ -74,7 +74,7 @@ public class NoAuthMongoClientWrapperTest {
   @Mock private MongoClient mockMongoClient;
   @Mock private MongoUtilLogger mockMongoUtilLogger;
   @Mock private MongoProperties mongoProperties;
-  @Mock private MongoClientFactory mongoClientFactory;
+  @Mock private DefaultMongoClientFactory mongoClientFactory;
   @Mock private MongoClientOptions mongoClientOptions;
   @Mock private DB mockDB;
   @Mock DBCollection collection;

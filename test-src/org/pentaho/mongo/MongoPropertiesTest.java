@@ -1,5 +1,5 @@
 /*!
-* Copyright 2010 - 2014 Pentaho Corporation.  All rights reserved.
+* Copyright 2010 - 2016 Pentaho Corporation.  All rights reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -24,23 +24,22 @@ import org.mockito.Mockito;
 
 import javax.net.ssl.SSLSocketFactory;
 
-import static junit.framework.Assert.*;
-import static org.pentaho.mongo.MongoProp.*;
+import static org.junit.Assert.*;
 
 public class MongoPropertiesTest {
   @Test
   public void testBuildsMongoClientOptions() throws Exception {
     MongoProperties props = new MongoProperties.Builder()
-        .set( connectionsPerHost, "127" )
-        .set( connectTimeout, "333" )
-        .set( maxWaitTime, "12345" )
-        .set( cursorFinalizerEnabled, "false" )
-        .set( socketKeepAlive, "true" )
-        .set( socketTimeout, "4" )
-        .set( useSSL, "true" )
-        .set( readPreference, "primary" )
-        .set( USE_KERBEROS, "false" )
-        .set( USE_ALL_REPLICA_SET_MEMBERS, "false" )
+        .set( MongoProp.connectionsPerHost, "127" )
+        .set( MongoProp.connectTimeout, "333" )
+        .set( MongoProp.maxWaitTime, "12345" )
+        .set( MongoProp.cursorFinalizerEnabled, "false" )
+        .set( MongoProp.socketKeepAlive, "true" )
+        .set( MongoProp.socketTimeout, "4" )
+        .set( MongoProp.useSSL, "true" )
+        .set( MongoProp.readPreference, "primary" )
+        .set( MongoProp.USE_KERBEROS, "false" )
+        .set( MongoProp.USE_ALL_REPLICA_SET_MEMBERS, "false" )
         .build();
     MongoUtilLogger log = Mockito.mock( MongoUtilLogger.class );
     MongoClientOptions options = props.buildMongoClientOptions( log );

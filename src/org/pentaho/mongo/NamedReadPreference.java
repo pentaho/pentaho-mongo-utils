@@ -1,5 +1,5 @@
 /*!
-* Copyright 2010 - 2014 Pentaho Corporation.  All rights reserved.
+* Copyright 2010 - 2016 Pentaho Corporation.  All rights reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -19,9 +19,12 @@ package org.pentaho.mongo;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import com.mongodb.DBObject;
 import com.mongodb.ReadPreference;
+import com.mongodb.Tag;
+import com.mongodb.TagSet;
 import com.mongodb.TaggableReadPreference;
 
 public enum NamedReadPreference {
@@ -60,16 +63,34 @@ public enum NamedReadPreference {
 
     switch ( this ) {
       case PRIMARY_PREFERRED:
-        return ReadPreference.primaryPreferred( firstTagSet, remainingTagSets );
+        return ReadPreference.primaryPreferred( toTagsList( firstTagSet, remainingTagSets ) );
       case SECONDARY:
-        return ReadPreference.secondary( firstTagSet, remainingTagSets );
+        return ReadPreference.secondary( toTagsList( firstTagSet, remainingTagSets ) );
       case SECONDARY_PREFERRED:
-        return ReadPreference.secondaryPreferred( firstTagSet, remainingTagSets );
+        return ReadPreference.secondaryPreferred( toTagsList( firstTagSet, remainingTagSets ) );
       case NEAREST:
-        return ReadPreference.nearest( firstTagSet, remainingTagSets );
+        return ReadPreference.nearest( toTagsList( firstTagSet, remainingTagSets ) );
       default:
         return ( pref instanceof TaggableReadPreference ) ? pref : null;
     }
+  }
+
+  private static List<TagSet> toTagsList( DBObject firstTagSet, DBObject[] remainingTagSets ) {
+    List tagsList = new ArrayList( remainingTagSets.length + 1 );
+    tagsList.add( toTags( firstTagSet ) );
+    for ( DBObject cur : remainingTagSets ) {
+      tagsList.add( toTags( cur ) );
+    }
+
+    return tagsList;
+  }
+
+  private static TagSet toTags( DBObject tagsDocument ) {
+    List tagList = new ArrayList();
+    for ( String key : tagsDocument.keySet() ) {
+      tagList.add( new Tag( key, tagsDocument.get( key ).toString() ) );
+    }
+    return new TagSet( tagList );
   }
 
   public static NamedReadPreference byName( String preferenceName ) {
