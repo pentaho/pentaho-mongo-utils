@@ -1,5 +1,5 @@
 /*!
-  * Copyright 2010 - 2015 Pentaho Corporation.  All rights reserved.
+  * Copyright 2010 - 2016 Pentaho Corporation.  All rights reserved.
   *
   * Licensed under the Apache License, Version 2.0 (the "License");
   * you may not use this file except in compliance with the License.
@@ -34,6 +34,12 @@ class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper {
   private final String user;
 
   /**
+   * Default authentication database for backward compatibility with pentaho-mongodb-plugin 5.x
+   * http://jira.pentaho.com/browse/SP-2700
+   */
+  private static final String DEFAULT_AUTH_DB = "admin";
+
+  /**
    * Create a connection to a Mongo server based on parameters supplied in the step meta data
    *
    * @param props properties to use
@@ -64,9 +70,10 @@ class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper {
   @Override
   public List<MongoCredential> getCredentialList() {
     List<MongoCredential> credList = new ArrayList<MongoCredential>();
+    String authDbName = props.get( MongoProp.DBNAME );
     credList.add( MongoCredential.createCredential(
         props.get( MongoProp.USERNAME ),
-        props.get( MongoProp.DBNAME ),
+        authDbName == null || authDbName.trim().length() == 0 ? DEFAULT_AUTH_DB : authDbName,
         props.get( MongoProp.PASSWORD ).toCharArray() ) );
     return credList;
   }
