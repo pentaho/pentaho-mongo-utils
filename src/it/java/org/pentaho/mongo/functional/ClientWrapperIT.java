@@ -62,7 +62,7 @@ public class ClientWrapperIT extends TestBase {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    System.setProperty( "javax.net.ssl.trustStore", "keystore.jks" );
+    System.setProperty( "javax.net.ssl.trustStore", ClientWrapperIT.class.getResource( "/keystore.jks" ).getPath() );
   }
 
   @After
