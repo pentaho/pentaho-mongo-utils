@@ -89,9 +89,17 @@ That should write out a file in cwd with the name "kerberos.keytab".
 
 5)  Install JCE.  This is required for using Kerberos with AES256.
 http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html  
+hint: on Ubuntu if you are using the webupd8 ppa for Java you can install oracle-java8-unlimited-jce-policy
 6)  If authenticating with kerberos in biserver, make sure to set the USE_KERBEROS property to true in your olap4j.properties file.  If using a keytab file, also specify PENTAHO_JAAS_AUTH_MODE=KERBEROS_KEYTAB and PENTAHO_JAAS_KEYTAB_FILE=<path/to/keytabfile>.  See MongoProps for more detail.
 
 
+Running Integration Tests
+=========================================
+The integration tests will connect to MongoDB servers using plain authentication, kerberos authentication, and SSL.  The kerberos tests require generating a keytab file, which is done during the pre-integration-test phase of the mvn build.  The kerberos user and password need to be specified on the command line as follows:
+
+````
+mvn -DrunITs -Dkerberos.principal=user@domain -Dkerberos.password=password install
+````
 
 Troubleshooting Kerberos
 ========================

@@ -19,6 +19,7 @@ package org.pentaho.mongo.functional;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class TestBase {
@@ -28,8 +29,7 @@ public class TestBase {
   protected static Properties initTestProperties() {
     Properties props = new Properties();
     try {
-      props.load(
-        new FileReader( "test.properties" )  );
+      props.load( TestBase.class.getResourceAsStream( "/test.properties" ) );
       return props;
     } catch ( IOException e ) {
       throw new RuntimeException( e );
