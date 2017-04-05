@@ -30,7 +30,7 @@ import org.pentaho.mongo.MongoProperties;
  * appropriate for given configuration properties, i.e. using the correct
  * authentication mechanism, server info, and MongoConfigurationOptions.
  */
-public class MongoClientWrapperFactory {
+public class MongoClientWrapperFactory  {
 
   /**
    *
@@ -42,6 +42,9 @@ public class MongoClientWrapperFactory {
   public static MongoClientWrapper createMongoClientWrapper(
     MongoProperties props, MongoUtilLogger log )
     throws MongoDbException {
+    if(props.useAtlas()){
+      return new MongoAtlasClientWrapper( props, log );
+    }
     if ( props.useKerberos() ) {
       return initKerberosProxy( new KerberosMongoClientWrapper( props, log ) );
     } else if ( !Util.isEmpty( props.get( MongoProp.USERNAME ) )

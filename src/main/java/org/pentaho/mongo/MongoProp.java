@@ -97,7 +97,7 @@ public enum MongoProp {
    */
   USE_ALL_REPLICA_SET_MEMBERS,
 
-
+  USE_ATLAS,
 
   // MongoClientOptions values.  The following properties correspond to
   // http://api.mongodb.org/java/2.12/com/mongodb/MongoClientOptions.html
@@ -175,6 +175,7 @@ public enum MongoProp {
       }
     }
   },
+
 
   /**
    * Read preference to use:  [primary, primaryPreferred, secondary, secondaryPreferred, nearest]
