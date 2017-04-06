@@ -39,7 +39,6 @@ public class MongoAtlasClientWrapper implements MongoClientWrapper{
     String uri = new StringBuilder("mongodb://").append( props.get( MongoProp.USERNAME ) ).append( ":" ).append( props.get( MongoProp.PASSWORD )).append( "@" ).append( props.get( MongoProp.HOST ) ).toString();
     this.mongoClientURI = new MongoClientURI(uri);
     this.mongo = new MongoClient(mongoClientURI);
-    String breakP ="";
   }
 
   MongoAtlasClientWrapper(MongoClient mongoClient, MongoClientURI mongoClientURI, MongoProperties props, MongoUtilLogger log ){
