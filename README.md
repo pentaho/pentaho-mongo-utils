@@ -93,8 +93,52 @@ hint: on Ubuntu if you are using the webupd8 ppa for Java you can install oracle
 6)  If authenticating with kerberos in biserver, make sure to set the USE_KERBEROS property to true in your olap4j.properties file.  If using a keytab file, also specify PENTAHO_JAAS_AUTH_MODE=KERBEROS_KEYTAB and PENTAHO_JAAS_KEYTAB_FILE=<path/to/keytabfile>.  See MongoProps for more detail.
 
 
+#### Pre-requisites for building the project:
+* Maven, version 3+
+* Java JDK 1.8
+* This [settings.xml](https://github.com/pentaho/maven-parent-poms/blob/master/maven-support-files/settings.xml) in your <user-home>/.m2 directory
+
+#### Building it
+
+__Build for nightly/release__
+
+All required profiles are activated by the presence of a property named "release".
+
+```
+$ mvn clean install -Drelease
+```
+
+This will build, unit test, and package the whole project (all of the sub-modules). The artifact will be generated in: ```target```
+
+__Build for CI/dev__
+
+The `release` builds will compile the source for production (meaning potential obfuscation and/or uglification). To build without that happening, just eliminate the `release` property.
+
+```
+$ mvn clean install
+```
+
+#### Running the tests
+
+__Unit tests__
+
+This will run all tests in the project (and sub-modules).
+```
+$ mvn test
+```
+
+If you want to remote debug a single java unit test (default port is 5005):
+```
+$ cd core
+$ mvn test -Dtest=<<YourTest>> -Dmaven.surefire.debug
+```
 Running Integration Tests
 =========================================
+
+In addition to the unit tests, there are integration tests in the core project.
+```
+$ mvn verify -DrunITs
+```
 The integration tests will connect to MongoDB servers using plain authentication, kerberos authentication, and SSL.  The kerberos tests require generating a keytab file, which is done during the pre-integration-test phase of the mvn build.  The kerberos user and password need to be specified on the command line as follows:
 
 ````
