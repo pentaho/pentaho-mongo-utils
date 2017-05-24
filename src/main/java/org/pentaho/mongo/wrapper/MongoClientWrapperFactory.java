@@ -42,7 +42,7 @@ public class MongoClientWrapperFactory  {
   public static MongoClientWrapper createMongoClientWrapper(
     MongoProperties props, MongoUtilLogger log )
     throws MongoDbException {
-    if(props.useAtlas()){
+    if ( props.useAtlas() ) {
       return new MongoAtlasClientWrapper( props, log );
     }
     if ( props.useKerberos() ) {

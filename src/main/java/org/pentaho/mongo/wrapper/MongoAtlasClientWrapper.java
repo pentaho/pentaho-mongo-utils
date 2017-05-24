@@ -1,3 +1,20 @@
+/*!
+  * Copyright 2010 - 2016 Pentaho Corporation.  All rights reserved.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+  *
+  * http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  *
+  */
+
 package org.pentaho.mongo.wrapper;
 
 import com.mongodb.DB;
@@ -21,7 +38,8 @@ import java.util.Set;
 /**
  * Created by dams on 13-02-2017.
  */
-public class MongoAtlasClientWrapper implements MongoClientWrapper{
+
+public class MongoAtlasClientWrapper implements MongoClientWrapper {
   private static Class<?> PKG = MongoAtlasClientWrapper.class;
 
   static MongoClientFactory clientFactory = new DefaultMongoClientFactory();
@@ -32,36 +50,36 @@ public class MongoAtlasClientWrapper implements MongoClientWrapper{
   protected MongoProperties props;
 
 
-  MongoAtlasClientWrapper(MongoProperties props, MongoUtilLogger log) throws MongoDbException {
+  MongoAtlasClientWrapper( MongoProperties props, MongoUtilLogger log ) throws MongoDbException {
     this.log = log;
-    this.props= props;
+    this.props = props;
 
-    String uri = new StringBuilder("mongodb://").append( props.get( MongoProp.USERNAME ) ).append( ":" ).append( props.get( MongoProp.PASSWORD )).append( "@" ).append( props.get( MongoProp.HOST ) ).toString();
-    this.mongoClientURI = new MongoClientURI(uri);
-    this.mongo = new MongoClient(mongoClientURI);
+    String uri = new StringBuilder( "mongodb://" ).append( props.get( MongoProp.USERNAME ) ).append( ":" ).append( props.get( MongoProp.PASSWORD ) ).append( "@" ).append( props.get( MongoProp.HOST ) ).toString();
+    this.mongoClientURI = new MongoClientURI( uri );
+    this.mongo = new MongoClient( mongoClientURI );
   }
 
-  MongoAtlasClientWrapper(MongoClient mongoClient, MongoClientURI mongoClientURI, MongoProperties props, MongoUtilLogger log ){
-    this.mongoClientURI=mongoClientURI;
-    this.mongo=mongoClient;
-    this.log=log;
-    this.props=props;
+  MongoAtlasClientWrapper( MongoClient mongoClient, MongoClientURI mongoClientURI, MongoProperties props, MongoUtilLogger log ) {
+    this.mongoClientURI = mongoClientURI;
+    this.mongo = mongoClient;
+    this.log = log;
+    this.props = props;
   }
 
-  MongoClient getMongo(){
+  MongoClient getMongo() {
     return mongo;
   }
 
   /**
    * Retrieve all database names found in MongoDB as visible by the authenticated user.
    *
-   * @throws MongoDbException
+   * @throws MongoDbException if a problem occurs
    */
   @Override
   public List<String> getDatabaseNames() throws MongoDbException {
     try {
       return  getMongo().getDatabaseNames();
-    }catch (Exception e ){
+    } catch ( Exception e ) {
       throw new MongoDbException( e );
     }
   }
@@ -95,7 +113,7 @@ public class MongoAtlasClientWrapper implements MongoClientWrapper{
 
   /**
    * Return a list of custom "lastErrorModes" (if any) defined in the replica set configuration object on the server.
-   * These can be used as the "w" setting for the write concern in addition to the standard "w" values of <number> or
+   * These can be used as the "w" setting for the write concern in addition to the standard "w" values of number or
    * "majority".
    *
    * @return a list of the names of any custom "lastErrorModes"
@@ -107,7 +125,7 @@ public class MongoAtlasClientWrapper implements MongoClientWrapper{
   }
 
   @Override
-  public List<String> getIndexInfo(String s, String s1) throws MongoDbException {
+  public List<String> getIndexInfo( String s, String s1 ) throws MongoDbException {
     return null;
   }
 
@@ -126,7 +144,7 @@ public class MongoAtlasClientWrapper implements MongoClientWrapper{
    * @throws MongoDbException if a problem occurs
    */
   @Override
-  public List<String> getReplicaSetMembersThatSatisfyTagSets(List<DBObject> list) throws MongoDbException {
+  public List<String> getReplicaSetMembersThatSatisfyTagSets( List<DBObject> list ) throws MongoDbException {
     return null;
   }
 
@@ -135,7 +153,7 @@ public class MongoAtlasClientWrapper implements MongoClientWrapper{
   }
 
   @Override
-  public MongoCollectionWrapper getCollection(String db, String name ) throws MongoDbException {
+  public MongoCollectionWrapper getCollection( String db, String name ) throws MongoDbException {
     return wrap( getDb( db ).getCollection( name ) );
   }
 
@@ -164,7 +182,7 @@ public class MongoAtlasClientWrapper implements MongoClientWrapper{
     return action.perform( getDb( db ) );
   }
 
-  public MongoClientFactory getClientFactory(MongoProperties opts ) {
+  public MongoClientFactory getClientFactory( MongoProperties opts ) {
     return clientFactory;
   }
 }

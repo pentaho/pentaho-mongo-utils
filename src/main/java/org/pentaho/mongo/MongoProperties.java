@@ -80,7 +80,7 @@ public class MongoProperties {
     return Boolean.valueOf( props.get( MongoProp.USE_ALL_REPLICA_SET_MEMBERS ) );
   }
 
-  public boolean useAtlas(){
+  public boolean useAtlas() {
     return Boolean.parseBoolean( props.get( MongoProp.USE_ATLAS ) );
   }
 
