@@ -93,45 +93,48 @@ hint: on Ubuntu if you are using the webupd8 ppa for Java you can install oracle
 6)  If authenticating with kerberos in biserver, make sure to set the USE_KERBEROS property to true in your olap4j.properties file.  If using a keytab file, also specify PENTAHO_JAAS_AUTH_MODE=KERBEROS_KEYTAB and PENTAHO_JAAS_KEYTAB_FILE=<path/to/keytabfile>.  See MongoProps for more detail.
 
 
+How to build
+--------------
+
+pentaho-mongo-utils uses the maven framework. 
+
+
 #### Pre-requisites for building the project:
 * Maven, version 3+
 * Java JDK 1.8
-* This [settings.xml](https://github.com/pentaho/maven-parent-poms/blob/master/maven-support-files/settings.xml) in your <user-home>/.m2 directory
+* This [settings.xml](https://raw.githubusercontent.com/pentaho/maven-parent-poms/master/maven-support-files/settings.xml) in your <user-home>/.m2 directory
 
 #### Building it
 
-__Build for nightly/release__
-
-All required profiles are activated by the presence of a property named "release".
-
-```
-$ mvn clean install -Drelease
-```
-
-This will build, unit test, and package the whole project (all of the sub-modules). The artifact will be generated in: ```target```
-
-__Build for CI/dev__
-
-The `release` builds will compile the source for production (meaning potential obfuscation and/or uglification). To build without that happening, just eliminate the `release` property.
+This is a maven project, and to build it use the following command
 
 ```
 $ mvn clean install
 ```
+Optionally you can specify -Drelease to trigger obfuscation and/or uglification (as needed)
+
+Optionally you can specify -Dmaven.test.skip=true to skip the tests (even though
+you shouldn't as you know)
+
+The build result will be a Pentaho package located in ```target```.
 
 #### Running the tests
 
 __Unit tests__
 
-This will run all tests in the project (and sub-modules).
+This will run all unit tests in the project (and sub-modules). To run integration tests as well, see Integration Tests below.
+
 ```
 $ mvn test
 ```
 
 If you want to remote debug a single java unit test (default port is 5005):
+
 ```
 $ cd core
 $ mvn test -Dtest=<<YourTest>> -Dmaven.surefire.debug
 ```
+
 Running Integration Tests
 =========================================
 
@@ -152,6 +155,12 @@ Kerberos can be tricky to get working.  Pentaho infocenter has good information 
 
 Adding the java property sun.security.krb5.debug=true provides some debug level logging to standard out.  If AES256 encryption is being used, a common error is the following, which indicates the JVM does not have JCE available.  
 
-> unsupported key type found the default TGT: 18
+__IntelliJ__
+
+* Don't use IntelliJ's built-in maven. Make it use the same one you use from the commandline.
+  * Project Preferences -> Build, Execution, Deployment -> Build Tools -> Maven ==> Maven home directory
+
+````
+
 
 
