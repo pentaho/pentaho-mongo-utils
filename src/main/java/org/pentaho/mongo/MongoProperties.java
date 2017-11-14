@@ -80,6 +80,10 @@ public class MongoProperties {
     return Boolean.valueOf( props.get( MongoProp.USE_ALL_REPLICA_SET_MEMBERS ) );
   }
 
+  public boolean useAtlas() {
+    return Boolean.parseBoolean( props.get( MongoProp.USE_ATLAS ) );
+  }
+
   /**
    * @return the com.mongodb.ReadPreference associated with the MongoProp.readPreference value.
    */
