@@ -24,7 +24,6 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test-src/org/pentaho/mongo/wrapper/org/pentaho/functional/UserPassAuthTest.java" afterPath="$PROJECT_DIR$/test-src/org/pentaho/mongo/wrapper/org/pentaho/functional/UserPassAuthTest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/build.xml" afterPath="$PROJECT_DIR$/build.xml" />
     </list>
-    <ignored path="pentaho-mongolap.iws" />
     <ignored path=".idea/workspace.xml" />
     <file path="/AggPipeline.java" changelist="9b9e460f-d899-4dc1-99d0-a27bbc0f8a39" time="1384185606450" ignored="false" />
     <file path="$PROJECT_DIR$/../mondrian/src/main/mondrian/rolap/RolapNativeSet.java" changelist="9b9e460f-d899-4dc1-99d0-a27bbc0f8a39" time="1384196292064" ignored="false" />
@@ -198,7 +197,6 @@
     <file path="/.project" changelist="9b9e460f-d899-4dc1-99d0-a27bbc0f8a39" time="1393872905571" ignored="false" />
     <file path="$PROJECT_DIR$/../pentaho-mongodb-plugin/src/org/pentaho/mongo/wrapper/NoAuthMongoClientWrapper.java" changelist="9b9e460f-d899-4dc1-99d0-a27bbc0f8a39" time="1393962267019" ignored="false" />
     <file path="/NoAuthMongoClientWrapper.java" changelist="9b9e460f-d899-4dc1-99d0-a27bbc0f8a39" time="1394227545519" ignored="false" />
-    <file path="$PROJECT_DIR$/../pentaho-mongolap/src/com/pentaho/analysis/mongo/MongoStatement.java" changelist="9b9e460f-d899-4dc1-99d0-a27bbc0f8a39" time="1393951131486" ignored="false" />
     <file path="/MongoStatement.java" changelist="9b9e460f-d899-4dc1-99d0-a27bbc0f8a39" time="1393951107827" ignored="false" />
     <file path="$PROJECT_DIR$/../mondrian-mfork/testsrc/main/mondrian/test/build/AntTestBase.java" changelist="9b9e460f-d899-4dc1-99d0-a27bbc0f8a39" time="1393961412784" ignored="false" />
     <file path="$PROJECT_DIR$/../pentaho-mongodb-plugin/test-src/org/pentaho/di/trans/steps/mongodbinput/MongoDbInputTest.java" changelist="9b9e460f-d899-4dc1-99d0-a27bbc0f8a39" time="1393962905629" ignored="false" />
@@ -240,7 +238,6 @@
     <file path="/MondrianCatalogHelper.java" changelist="9b9e460f-d899-4dc1-99d0-a27bbc0f8a39" time="1394207785425" ignored="false" />
     <file path="/NoAuthTest.java" changelist="9b9e460f-d899-4dc1-99d0-a27bbc0f8a39" time="1394219008501" ignored="false" />
     <file path="/UserPassAuthTest.java" changelist="9b9e460f-d899-4dc1-99d0-a27bbc0f8a39" time="1394462383390" ignored="false" />
-    <file path="$PROJECT_DIR$/../pentaho-mongolap/test.properties" changelist="9b9e460f-d899-4dc1-99d0-a27bbc0f8a39" time="1394221677032" ignored="false" />
     <file path="/build.xml" changelist="9b9e460f-d899-4dc1-99d0-a27bbc0f8a39" time="1394466114224" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -420,7 +417,6 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FavoritesManager">
-    <favorites_list name="pentaho-mongolap" />
   </component>
   <component name="FileEditorManager">
     <splitter split-orientation="horizontal" split-proportion="0.47293234">
