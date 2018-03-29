@@ -1,5 +1,5 @@
 /*!
-* Copyright 2010 - 2018 Hitachi Vantara.  All rights reserved.
+* Copyright 2010 - 2017 Hitachi Vantara.  All rights reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@ package org.pentaho.mongo.wrapper.collection;
 
 import java.util.List;
 
-import com.mongodb.AggregationOptions;
-import com.mongodb.BasicDBObject;
-import com.mongodb.Cursor;
-import com.mongodb.DBObject;
-import com.mongodb.WriteResult;
 import org.pentaho.mongo.MongoDbException;
 import org.pentaho.mongo.wrapper.cursor.MongoCursorWrapper;
+
+import com.mongodb.AggregationOutput;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import com.mongodb.WriteResult;
 
 /**
  * Defines the wrapper interface for all interactions with a MongoCollection via
@@ -37,9 +37,7 @@ public interface MongoCollectionWrapper {
 
   MongoCursorWrapper find( DBObject dbObject, DBObject dbObject2 ) throws MongoDbException;
 
-  Cursor aggregate( List<? extends DBObject> pipeline, AggregationOptions options );
-
-  Cursor aggregate( DBObject firstP, DBObject[] remainder ) throws MongoDbException;
+  AggregationOutput aggregate( DBObject firstP, DBObject[] remainder ) throws MongoDbException;
 
   MongoCursorWrapper find() throws MongoDbException;
 
