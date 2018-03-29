@@ -1,5 +1,5 @@
 /*!
- * Copyright 2010 - 2017 Hitachi Vantara.  All rights reserved.
+ * Copyright 2010 - 2018 Hitachi Vantara.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 
 package org.pentaho.mongo.wrapper.collection;
 
+import com.mongodb.AggregationOptions;
 import com.mongodb.BasicDBObject;
+import com.mongodb.Cursor;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import org.hamcrest.CoreMatchers;
@@ -28,13 +30,18 @@ import org.mockito.MockitoAnnotations;
 import org.pentaho.mongo.MongoDbException;
 import org.pentaho.mongo.wrapper.cursor.MongoCursorWrapper;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class DefaultMongoCollectionWrapperTest {
 
@@ -63,10 +70,14 @@ public class DefaultMongoCollectionWrapperTest {
   }
 
   @Test public void testPassThroughMethods() throws MongoDbException {
+    // Setup aggregate to use MongoDB Cursor method instead
+    AggregationOptions options = AggregationOptions.builder().build();
+    List<DBObject> pipeline = new ArrayList<>(); // can be empty
+
     defaultMongoCollectionWrapper.drop();
     verify( mockDBCollection ).drop();
-    defaultMongoCollectionWrapper.aggregate( dbObject, dbObjectArray );
-    verify( mockDBCollection ).aggregate( dbObject, dbObjectArray );
+    defaultMongoCollectionWrapper.aggregate( pipeline, options );
+    verify( mockDBCollection ).aggregate( pipeline, options );
     defaultMongoCollectionWrapper.update( dbObject, dbObject, true, true );
     verify( mockDBCollection ).update( dbObject, dbObject, true, true );
     defaultMongoCollectionWrapper.insert( dbObjList );
@@ -83,6 +94,14 @@ public class DefaultMongoCollectionWrapperTest {
     verify( mockDBCollection ).distinct( "key" );
   }
 
+  @Test
+  public void testAggregate() throws MongoDbException {
+    Cursor mockCursor = mock( Cursor.class );
+    when( mockDBCollection.aggregate( anyList(), any( AggregationOptions.class ) ) ).thenReturn( mockCursor );
+    Cursor ret = defaultMongoCollectionWrapper.aggregate( dbObject, dbObjectArray );
+    assertEquals( mockCursor, ret );
+  }
+
   @Test public void testFindWrapsCursor() throws MongoDbException {
     assertThat( defaultMongoCollectionWrapper.find(), CoreMatchers.instanceOf( MongoCursorWrapper.class ) );
     verify( mockDBCollection ).find();
@@ -92,5 +111,4 @@ public class DefaultMongoCollectionWrapperTest {
     verify( mockDBCollection ).find( dbObject );
 
   }
-
 }
