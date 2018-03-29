@@ -1,5 +1,5 @@
 /*!
- * Copyright 2010 - 2017 Hitachi Vantara.  All rights reserved.
+ * Copyright 2010 - 2018 Hitachi Vantara.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 package org.pentaho.mongo.wrapper.collection;
 
+import com.mongodb.AggregationOptions;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
@@ -28,6 +29,8 @@ import org.mockito.MockitoAnnotations;
 import org.pentaho.mongo.MongoDbException;
 import org.pentaho.mongo.wrapper.cursor.MongoCursorWrapper;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertThat;
@@ -63,10 +66,14 @@ public class DefaultMongoCollectionWrapperTest {
   }
 
   @Test public void testPassThroughMethods() throws MongoDbException {
+    // Setup aggregate to use MongoDB Cursor method instead
+    AggregationOptions options = AggregationOptions.builder().build();
+    List<DBObject> pipeline = new ArrayList<>(); // can be empty
+
     defaultMongoCollectionWrapper.drop();
     verify( mockDBCollection ).drop();
-    defaultMongoCollectionWrapper.aggregate( dbObject, dbObjectArray );
-    verify( mockDBCollection ).aggregate( dbObject, dbObjectArray );
+    defaultMongoCollectionWrapper.aggregate( pipeline, options );
+    verify( mockDBCollection ).aggregate( pipeline, options );
     defaultMongoCollectionWrapper.update( dbObject, dbObject, true, true );
     verify( mockDBCollection ).update( dbObject, dbObject, true, true );
     defaultMongoCollectionWrapper.insert( dbObjList );
@@ -92,5 +99,4 @@ public class DefaultMongoCollectionWrapperTest {
     verify( mockDBCollection ).find( dbObject );
 
   }
-
 }
