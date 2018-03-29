@@ -1,5 +1,5 @@
 /*!
-* Copyright 2010 - 2018 Hitachi Vantara.  All rights reserved.
+* Copyright 2010 - 2017 Hitachi Vantara.  All rights reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -23,9 +23,8 @@ import org.pentaho.mongo.MongoDbException;
 import org.pentaho.mongo.wrapper.cursor.DefaultCursorWrapper;
 import org.pentaho.mongo.wrapper.cursor.MongoCursorWrapper;
 
-import com.mongodb.AggregationOptions;
+import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBObject;
-import com.mongodb.Cursor;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -44,17 +43,8 @@ public class DefaultMongoCollectionWrapper implements MongoCollectionWrapper {
   }
 
   @Override
-  public Cursor aggregate( List<? extends DBObject> pipeline, AggregationOptions options ) {
-    return collection.aggregate( pipeline, options );
-  }
-
-  @Override
-  public Cursor aggregate( DBObject firstP, DBObject[] remainder ) {
-    AggregationOptions options = AggregationOptions.builder().build();
-    List<DBObject> pipeline = new ArrayList<>();
-    pipeline.add( firstP );
-    Collections.addAll( pipeline, remainder );
-    return aggregate( pipeline, options );
+  public AggregationOutput aggregate( DBObject firstP, DBObject[] remainder ) throws MongoDbException {
+    return collection.aggregate( firstP, remainder );
   }
 
   @Override
