@@ -1,5 +1,5 @@
 /*!
-  * Copyright 2010 - 2017 Hitachi Vantara.  All rights reserved.
+  * Copyright 2010 - 2018 Hitachi Vantara.  All rights reserved.
   *
   * Licensed under the Apache License, Version 2.0 (the "License");
   * you may not use this file except in compliance with the License.
@@ -71,19 +71,24 @@ class UsernamePasswordMongoClientWrapper extends NoAuthMongoClientWrapper {
       authMecha = "";
     }
 
-    if ( authMecha.equals( "SCRAM-SHA-1" ) ) {
+    //Use the AuthDatabase if one was supplied, otherwise use the connecting database
+    authDatabase = ( authDatabase == null || authDatabase.trim().isEmpty() )
+                      ? props.get( MongoProp.DBNAME ) : authDatabase;
+
+    if ( authMecha.equalsIgnoreCase( "SCRAM-SHA-1" ) ) {
       credList.add( MongoCredential.createScramSha1Credential(
         props.get( MongoProp.USERNAME ),
-        authDatabase == null || authDatabase.equals( "" )
-          ?
-            props.get( MongoProp.DBNAME ) : authDatabase,
+        authDatabase,
         props.get( MongoProp.PASSWORD ).toCharArray() ) );
+    } else if ( authMecha.equalsIgnoreCase( "PLAIN" ) ) {
+      credList.add( MongoCredential.createPlainCredential(
+          props.get( MongoProp.USERNAME ),
+          authDatabase,
+          props.get( MongoProp.PASSWORD ).toCharArray() ) );
     } else {
       credList.add( MongoCredential.createCredential(
         props.get( MongoProp.USERNAME ),
-        authDatabase == null || authDatabase.equals( "" ) // Backward compatibility --Kaa
-          ?
-            props.get( MongoProp.DBNAME ) : authDatabase,
+        authDatabase,
         props.get( MongoProp.PASSWORD ).toCharArray() ) );
     }
     return credList;

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2010 - 2017 Hitachi Vantara.  All rights reserved.
+ * Copyright 2010 - 2018 Hitachi Vantara.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,25 +139,30 @@ public class UsernamePasswordMongoClientWrapperTest {
     final String username = "testuser";
     final String password = "testpass";
     final String dbName = "database";
-    final String authMecha = "SCRAM-SHA-1";
 
-    // MongoProp.AUTH_DATABASE is null
-    mongoPropertiesBuilder = new MongoProperties.Builder()
-      .set( MongoProp.USERNAME, username )
-      .set( MongoProp.PASSWORD, password )
-      .set( MongoProp.AUTH_DATABASE, "" )
-      .set( MongoProp.DBNAME, dbName )
-      .set( MongoProp.AUTH_MECHA, authMecha );
+    final String[] authMechas = { "SCRAM-SHA-1", "PLAIN" };
 
-    UsernamePasswordMongoClientWrapper mongoClientWrapper =
-      new UsernamePasswordMongoClientWrapper( mongoPropertiesBuilder.build(), log );
-    List<MongoCredential> credentials = mongoClientWrapper.getCredentialList();
-    Assert.assertEquals( 1, credentials.size() );
-    Assert.assertEquals( authMecha, credentials.get( 0 ).getMechanism() );
-    Assert.assertEquals( username, credentials.get( 0 ).getUserName() );
-    Assert.assertEquals( dbName, credentials.get( 0 ).getSource() );
-    Assert.assertArrayEquals( password.toCharArray(), credentials.get( 0 ).getPassword() );
+    for ( String authMecha : authMechas ) {
+
+      // MongoProp.AUTH_DATABASE is null
+      mongoPropertiesBuilder =
+          new MongoProperties.Builder()
+                              .set( MongoProp.USERNAME, username )
+                              .set( MongoProp.PASSWORD, password )
+                              .set( MongoProp.AUTH_DATABASE, "" )
+                              .set( MongoProp.DBNAME, dbName )
+                              .set( MongoProp.AUTH_MECHA, authMecha );
+
+      UsernamePasswordMongoClientWrapper mongoClientWrapper =
+          new UsernamePasswordMongoClientWrapper( mongoPropertiesBuilder.build(), log );
+      List<MongoCredential> credentials = mongoClientWrapper.getCredentialList();
+      Assert.assertEquals( 1, credentials.size() );
+      Assert.assertEquals( authMecha, credentials.get( 0 ).getMechanism() );
+      Assert.assertEquals( username, credentials.get( 0 ).getUserName() );
+      Assert.assertEquals( dbName, credentials.get( 0 ).getSource() );
+      Assert.assertArrayEquals( password.toCharArray(), credentials.get( 0 ).getPassword() );
+
+    }
   }
-
 
 }
