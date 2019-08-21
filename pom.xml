@@ -5,11 +5,11 @@
   <parent>
     <groupId>org.pentaho</groupId>
     <artifactId>pentaho-ce-jar-parent-pom</artifactId>
-    <version>7.1-SNAPSHOT</version>
+    <version>7.1.0.27-218</version>
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>pentaho-mongo-utils</artifactId>
-  <version>7.1-SNAPSHOT</version>
+  <version>7.1.0.27-218</version>
   <packaging>bundle</packaging>
   <name>Pentaho Community Edition Project: ${project.artifactId}</name>
   <description>A library for simplifying the creation and management of MongoDB connections.</description>
@@ -21,11 +21,8 @@
   </scm>
   <properties>
     <mongo-java-driver.version>3.2.2</mongo-java-driver.version>
-    <junit.version>4.4</junit.version>
     <mockito-all.version>1.9.5</mockito-all.version>
-
-    <!--<kerberos.principal>buildguy@PENTAHO.DMZ</kerberos.principal>-->
-    <!--<kerberos.password></kerberos.password>-->
+    <junit.version>4.4</junit.version>
   </properties>
   <dependencies>
     <dependency>
@@ -66,12 +63,12 @@
     <profile>
       <id>kerberos-init</id>
       <activation>
-        <property>
-          <name>runITs</name>
-        </property>
         <os>
           <family>unix</family>
         </os>
+        <property>
+          <name>runITs</name>
+        </property>
       </activation>
       <build>
         <plugins>
@@ -91,16 +88,13 @@
               <executable>./kerberos.init.sh</executable>
               <workingDirectory>${basedir}/src/it/scripts/</workingDirectory>
               <arguments>
-                <!--suppress MavenModelInspection -->
                 <argument>${kerberos.principal}</argument>
-                <!--suppress MavenModelInspection -->
                 <argument>${kerberos.password}</argument>
                 <argument>${project.build.directory}/kerberos.keytab</argument>
               </arguments>
             </configuration>
           </plugin>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-enforcer-plugin</artifactId>
             <version>1.4.1</version>
             <executions>
