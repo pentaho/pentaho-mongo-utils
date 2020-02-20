@@ -2,3 +2,6 @@ target
 *.iml
 .idea
 pentaho-mongo-utils.iml
+.classpath
+.project
+.settings/
