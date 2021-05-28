@@ -58,6 +58,15 @@ public class DefaultMongoCollectionWrapper implements MongoCollectionWrapper {
     Collections.addAll( pipeline, remainder );
     return aggregate( pipeline, options );
   }
+  
+  @Override
+  public Cursor aggregate( DBObject firstP, DBObject[] remainder, boolean allowDiskUse ) {
+    AggregationOptions options = AggregationOptions.builder().allowDiskUse(allowDiskUse).build();
+    List<DBObject> pipeline = new ArrayList<>();
+    pipeline.add( firstP );
+    Collections.addAll( pipeline, remainder );
+    return aggregate( pipeline, options );
+  }
 
   @Override
   public MongoCursorWrapper find() throws MongoDbException {

@@ -40,6 +40,8 @@ public interface MongoCollectionWrapper {
   Cursor aggregate( List<? extends DBObject> pipeline, AggregationOptions options );
 
   Cursor aggregate( DBObject firstP, DBObject[] remainder ) throws MongoDbException;
+  
+  Cursor aggregate( DBObject firstP, DBObject[] remainder, boolean allowDiskUse ) throws MongoDbException;
 
   MongoCursorWrapper find() throws MongoDbException;
 
