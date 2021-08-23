@@ -1,5 +1,5 @@
 /*!
- * Copyright 2010 - 2017 Hitachi Vantara.  All rights reserved.
+ * Copyright 2010 - 2021 Hitachi Vantara.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,19 @@ public class MongoClientWrapperFactory {
     }
     // default
     return new NoAuthMongoClientWrapper( props, log );
+  }
+  /**
+   *
+   * @param connectionString  The ConnectionString to use for connection initialization
+   * @param log MongoUtilLogger implementation used for all log output
+   * @return MongoClientWrapper
+   * @throws MongoDbException
+   */
+  public static MongoClientWrapper createConnectionStringMongoClientWrapper(
+          String connectionString, MongoUtilLogger log )
+          throws MongoDbException {
+
+    return new ConnectionStringMongoClientWrapper( connectionString, log );
   }
 
   private static MongoClientWrapper initKerberosProxy(

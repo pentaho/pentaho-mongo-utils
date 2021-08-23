@@ -1,5 +1,5 @@
 /*!
-* Copyright 2010 - 2017 Hitachi Vantara.  All rights reserved.
+* Copyright 2010 - 2021 Hitachi Vantara.  All rights reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -30,4 +30,5 @@ public interface MongoClientFactory {
 
   MongoClient getMongoClient( List<ServerAddress> serverAddressList, List<MongoCredential> credList,
                               MongoClientOptions opts, boolean useReplicaSet );
+  MongoClient getConnectionStringMongoClient( String connectionString );
 }
