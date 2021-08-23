@@ -30,4 +30,5 @@ public interface MongoClientFactory {
 
   MongoClient getMongoClient( List<ServerAddress> serverAddressList, List<MongoCredential> credList,
                               MongoClientOptions opts, boolean useReplicaSet );
+  MongoClient getConnectionStringMongoClient( String connectionString );
 }

@@ -17,10 +17,7 @@
 
 package org.pentaho.mongo.wrapper;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
+import com.mongodb.*;
 
 import java.util.List;
 
@@ -40,5 +37,11 @@ public class DefaultMongoClientFactory implements MongoClientFactory {
     return useReplicaSet || serverAddressList.size() > 1
         ? new MongoClient( serverAddressList, credList, opts )
         : new MongoClient( serverAddressList.get( 0 ), credList, opts );
+  }
+
+  @Override
+  public MongoClient getConnectionStringMongoClient( String connectionString ) {
+    MongoClientURI uri = new MongoClientURI( connectionString );
+    return new MongoClient( uri );
   }
 }
