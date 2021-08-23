@@ -52,6 +52,19 @@ public class MongoClientWrapperFactory {
     // default
     return new NoAuthMongoClientWrapper( props, log );
   }
+  /**
+   *
+   * @param connectionString  The ConnectionString to use for connection initialization
+   * @param log MongoUtilLogger implementation used for all log output
+   * @return MongoClientWrapper
+   * @throws MongoDbException
+   */
+  public static MongoClientWrapper createConnectionStringMongoClientWrapper(
+          String connectionString, MongoUtilLogger log )
+          throws MongoDbException {
+
+    return new ConnectionStringMongoClientWrapper( connectionString, log );
+  }
 
   private static MongoClientWrapper initKerberosProxy(
     KerberosMongoClientWrapper wrapper ) {
