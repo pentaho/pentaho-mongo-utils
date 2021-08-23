@@ -150,7 +150,7 @@ public class ConnectionStringMongoClientWrapperTest {
   public void testGetAllTagsNoDB() throws MongoDbException {
     List<String> tags = connectionStringMongoClientWrapper.getAllTags();
     Mockito.verify( mockMongoUtilLogger ).info(
-      BaseMessages.getString( PKG, "MongoNoAuthWrapper.Message.Warning.LocalDBNotAvailable" ) );
+      BaseMessages.getString( PKG, "MongoConnectionStringWrapper.Message.Warning.LocalDBNotAvailable" ) );
     Assert.assertThat( tags.size(), IsEqual.equalTo( 0 ) );
   }
 
@@ -160,7 +160,7 @@ public class ConnectionStringMongoClientWrapperTest {
     List<String> tags = connectionStringMongoClientWrapper.getAllTags();
     Mockito.verify( mockMongoUtilLogger ).info(
       BaseMessages.getString( PKG,
-      "MongoNoAuthWrapper.Message.Warning.ReplicaSetCollectionUnavailable" ) );
+      "MongoConnectionStringWrapper.Message.Warning.ReplicaSetCollectionUnavailable" ) );
     Assert.assertThat( tags.size(), IsEqual.equalTo( 0 ) );
   }
 
@@ -175,7 +175,7 @@ public class ConnectionStringMongoClientWrapperTest {
     List<String> tags = connectionStringMongoClientWrapper.getAllTags();
     Mockito.verify( mockMongoUtilLogger ).info(
             BaseMessages.getString( PKG,
-                    "MongoNoAuthWrapper.Message.Warning.NoReplicaSetMembersDefined" ) );
+                    "MongoConnectionStringWrapper.Message.Warning.NoReplicaSetMembersDefined" ) );
     Assert.assertThat( tags.size(), IsEqual.equalTo( 0 ) );
   }
 
@@ -188,7 +188,7 @@ public class ConnectionStringMongoClientWrapperTest {
     List<String> tags = connectionStringMongoClientWrapper.getAllTags();
     Mockito.verify( mockMongoUtilLogger ).info(
             BaseMessages.getString( PKG,
-                    "MongoNoAuthWrapper.Message.Warning.NoReplicaSetMembersDefined" ) );
+                    "MongoConnectionStringWrapper.Message.Warning.NoReplicaSetMembersDefined" ) );
     Assert.assertThat( tags.size(), IsEqual.equalTo( 0 ) );
   }
 
@@ -202,7 +202,7 @@ public class ConnectionStringMongoClientWrapperTest {
     List<String> tags = connectionStringMongoClientWrapper.getAllTags();
     Mockito.verify( mockMongoUtilLogger ).info(
             BaseMessages.getString( PKG,
-                    "MongoNoAuthWrapper.Message.Warning.NoReplicaSetMembersDefined" ) );
+                    "MongoConnectionStringWrapper.Message.Warning.NoReplicaSetMembersDefined" ) );
     Assert.assertThat( tags.size(), IsEqual.equalTo( 0 ) );
   }
 
@@ -312,7 +312,7 @@ public class ConnectionStringMongoClientWrapperTest {
       Mockito.verify( mockDB ).getCollection( "collection" );
       Assert.assertThat( e.getMessage(),
         StringContains.containsString( BaseMessages.getString( PKG,
-               "MongoNoAuthWrapper.ErrorMessage.UnableToGetInfoForCollection",
+               "MongoConnectionStringWrapper.ErrorMessage.UnableToGetInfoForCollection",
               "collection" ) ) );
     }
   }
@@ -327,7 +327,7 @@ public class ConnectionStringMongoClientWrapperTest {
       Mockito.verify( mockDB ).getCollection( "collection" );
       Assert.assertThat( e.getMessage(),
         StringContains.containsString( BaseMessages.getString( PKG,
-             "MongoNoAuthWrapper.ErrorMessage.UnableToGetInfoForCollection",
+             "MongoConnectionStringWrapper.ErrorMessage.UnableToGetInfoForCollection",
              "collection" ) ) );
     }
   }
