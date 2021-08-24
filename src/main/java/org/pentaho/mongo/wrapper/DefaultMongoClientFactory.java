@@ -1,5 +1,5 @@
 /*!
- * Copyright 2010 - 2017 Hitachi Vantara.  All rights reserved.
+ * Copyright 2010 - 2021 Hitachi Vantara.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.pentaho.mongo.wrapper;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoClientURI;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
-
 import java.util.List;
 
 public class DefaultMongoClientFactory implements MongoClientFactory {
@@ -40,5 +40,11 @@ public class DefaultMongoClientFactory implements MongoClientFactory {
     return useReplicaSet || serverAddressList.size() > 1
         ? new MongoClient( serverAddressList, credList, opts )
         : new MongoClient( serverAddressList.get( 0 ), credList, opts );
+  }
+
+  @Override
+  public MongoClient getConnectionStringMongoClient( String connectionString ) {
+    MongoClientURI uri = new MongoClientURI( connectionString );
+    return new MongoClient( uri );
   }
 }

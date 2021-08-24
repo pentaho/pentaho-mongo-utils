@@ -1,5 +1,5 @@
 /*!
- * Copyright 2010 - 2017 Hitachi Vantara.  All rights reserved.
+ * Copyright 2010 - 2021 Hitachi Vantara.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 package org.pentaho.mongo.wrapper;
 
 import org.hamcrest.CoreMatchers;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -25,8 +26,8 @@ import org.mockito.MockitoAnnotations;
 import org.pentaho.mongo.MongoProp;
 import org.pentaho.mongo.MongoProperties;
 import org.pentaho.mongo.MongoUtilLogger;
+import static org.junit.Assert.assertThat;
 
-import static org.junit.Assert.*;
 
 public class MongoClientWrapperFactoryTest {
 
@@ -57,5 +58,23 @@ public class MongoClientWrapperFactoryTest {
                 .build(),
             logger );
     assertThat( wrapper, CoreMatchers.instanceOf( NoAuthMongoClientWrapper.class ) );
+  }
+
+  @Test
+  public void testExpCreateConnectionStringMongoClientWrapper() throws Exception {
+    try {
+      MongoClientWrapper wrapper = MongoClientWrapperFactory
+              .createConnectionStringMongoClientWrapper( "http://mongoDb1:", logger );
+      //Assert.fail( "expected exception" );
+    } catch ( Exception mde ) {
+      Assert.assertThat( mde, CoreMatchers.instanceOf( IllegalArgumentException.class ) );
+    }
+  }
+
+  @Test
+  public void testCreateConnectionStringMongoClientWrapper() throws Exception {
+    MongoClientWrapper wrapper = MongoClientWrapperFactory
+            .createConnectionStringMongoClientWrapper( "mongodb://localhost:27017", logger );
+    assertThat( wrapper, CoreMatchers.instanceOf( ConnectionStringMongoClientWrapper.class ) );
   }
 }
