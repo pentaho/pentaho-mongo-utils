@@ -18,19 +18,19 @@
 package org.pentaho.mongo.wrapper;
 
 import java.lang.reflect.Proxy;
-
-import org.pentaho.mongo.MongoUtilLogger;
-import org.pentaho.mongo.Util;
-import org.pentaho.mongo.MongoDbException;
 import org.pentaho.mongo.MongoProp;
 import org.pentaho.mongo.MongoProperties;
-
+import org.pentaho.mongo.MongoUtilLogger;
+import org.pentaho.mongo.MongoDbException;
+import org.pentaho.mongo.Util;
+import org.pentaho.mongo.BaseMessages;
 /**
  * MongoClientWrapperFactory is used to instantiate MongoClientWrapper objects
  * appropriate for given configuration properties, i.e. using the correct
  * authentication mechanism, server info, and MongoConfigurationOptions.
  */
 public class MongoClientWrapperFactory {
+  private static Class<?> PKG = MongoClientWrapperFactory.class;
 
   /**
    *
@@ -62,7 +62,13 @@ public class MongoClientWrapperFactory {
   public static MongoClientWrapper createConnectionStringMongoClientWrapper(
           String connectionString, MongoUtilLogger log )
           throws MongoDbException {
+    if ( connectionString == null || connectionString.isEmpty() ) {
+      throw new MongoDbException( BaseMessages.getString( PKG, "MongoConnectionStringWrapper.ErrorMessage.EmptyConnectionString" ) ); //$NON-NLS-1$
+    }
 
+    if ( connectionString.toLowerCase().contains( "authmechanism=gssapi" ) ) {
+      return initConnectionStringKerberosProxy( new KerberosConnectionStringMongoClientWrapper( connectionString, log ) );
+    }
     return new ConnectionStringMongoClientWrapper( connectionString, log );
   }
 
@@ -71,5 +77,11 @@ public class MongoClientWrapperFactory {
     return (MongoClientWrapper) Proxy.newProxyInstance( wrapper.getClass().getClassLoader(),
       new Class<?>[] { MongoClientWrapper.class },
       new KerberosInvocationHandler( wrapper.getAuthContext(), wrapper ) );
+  }
+  private static MongoClientWrapper initConnectionStringKerberosProxy(
+          KerberosConnectionStringMongoClientWrapper wrapper ) {
+    return (MongoClientWrapper) Proxy.newProxyInstance( wrapper.getClass().getClassLoader(),
+            new Class<?>[] { MongoClientWrapper.class },
+            new KerberosInvocationHandler( wrapper.getAuthContext(), wrapper ) );
   }
 }

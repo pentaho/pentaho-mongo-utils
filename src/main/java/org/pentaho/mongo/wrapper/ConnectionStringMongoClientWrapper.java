@@ -65,9 +65,9 @@ public class ConnectionStringMongoClientWrapper implements MongoClientWrapper {
           throws MongoDbException {
     this.connectionString = connectionString;
     this.log = log;
-    mongo = getClientFactory().getConnectionStringMongoClient( connectionString );
+    mongo = getClientFactory( connectionString ).getConnectionStringMongoClient( connectionString );
   }
-  public MongoClientFactory getClientFactory( ) {
+  public MongoClientFactory getClientFactory( String connectionString ) {
     return clientFactory;
   }
 
