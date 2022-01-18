@@ -1,5 +1,5 @@
 /*!
-* Copyright 2010 - 2018 Hitachi Vantara.  All rights reserved.
+* Copyright 2010 - 2022 Hitachi Vantara.  All rights reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public interface MongoCollectionWrapper {
 
   Cursor aggregate( List<? extends DBObject> pipeline, AggregationOptions options );
 
-  Cursor aggregate( DBObject firstP, DBObject[] remainder ) throws MongoDbException;
+  Cursor aggregate( DBObject firstP, DBObject[] remainder, boolean allowDiskUse ) throws MongoDbException;
 
   MongoCursorWrapper find() throws MongoDbException;
 

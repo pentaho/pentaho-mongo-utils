@@ -1,5 +1,5 @@
 /*!
- * Copyright 2010 - 2018 Hitachi Vantara.  All rights reserved.
+ * Copyright 2010 - 2022 Hitachi Vantara.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,15 @@ public class DefaultMongoCollectionWrapperTest {
   public void testAggregate() throws MongoDbException {
     Cursor mockCursor = mock( Cursor.class );
     when( mockDBCollection.aggregate( anyList(), any( AggregationOptions.class ) ) ).thenReturn( mockCursor );
-    Cursor ret = defaultMongoCollectionWrapper.aggregate( dbObject, dbObjectArray );
+    Cursor ret = defaultMongoCollectionWrapper.aggregate( dbObject, dbObjectArray, false );
+    assertEquals( mockCursor, ret );
+  }
+
+  @Test
+  public void testAggregateWithAllowDiskUse() {
+    Cursor mockCursor = mock( Cursor.class );
+    when( mockDBCollection.aggregate( anyList(), any( AggregationOptions.class ) ) ).thenReturn( mockCursor );
+    Cursor ret = defaultMongoCollectionWrapper.aggregate( dbObject, dbObjectArray, true );
     assertEquals( mockCursor, ret );
   }
 
