@@ -1,5 +1,5 @@
 /*!
- * Copyright 2010 - 2017 Hitachi Vantara.  All rights reserved.
+ * Copyright 2010 - 2022 Hitachi Vantara.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,26 +85,28 @@ public class ClientWrapperIT extends TestBase {
   @Parameterized.Parameters
   public static Collection<MongoProperties[]> data() {
     return Arrays.asList( new MongoProperties[][] {
-      { // KERBEROS
-        new MongoProperties.Builder()
-          .set( MongoProp.HOST, (String) testProperties.get( "single.server.host" ) )
-          .set( MongoProp.USERNAME, (String) testProperties.get( "kerberos.user" ) )
-          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
-          .set( MongoProp.USE_KERBEROS, "true" ).build() },
-      { // KERBEROS keytab
-        new MongoProperties.Builder()
-          .set( MongoProp.HOST, (String) testProperties.get( "single.server.host" ) )
-          .set( MongoProp.USERNAME, (String) testProperties.get( "kerberos.user" ) )
-          .set( MongoProp.PENTAHO_JAAS_KEYTAB_FILE, (String) testProperties.get( "kerberos.keytab" ) )
-          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
-          .set( MongoProp.PENTAHO_JAAS_AUTH_MODE, "KERBEROS_KEYTAB" )
-          .set( MongoProp.USE_KERBEROS, "true" ).build() },
+//      { // KERBEROS
+//        new MongoProperties.Builder()
+//          .set( MongoProp.HOST, (String) testProperties.get( "single.server.host" ) )
+//          .set( MongoProp.USERNAME, (String) testProperties.get( "kerberos.user" ) )
+//          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
+//          .set( MongoProp.USE_KERBEROS, "true" ).build() },
+//      { // KERBEROS keytab
+//        new MongoProperties.Builder()
+//          .set( MongoProp.HOST, (String) testProperties.get( "single.server.host" ) )
+//          .set( MongoProp.USERNAME, (String) testProperties.get( "kerberos.user" ) )
+//          .set( MongoProp.PENTAHO_JAAS_KEYTAB_FILE, (String) testProperties.get( "kerberos.keytab" ) )
+//          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
+//          .set( MongoProp.PENTAHO_JAAS_AUTH_MODE, "KERBEROS_KEYTAB" )
+//          .set( MongoProp.USE_KERBEROS, "true" ).build() },
       { // single server CR
         new MongoProperties.Builder()
           .set( MongoProp.HOST, (String) testProperties.get( "single.server.host" ) )
           .set( MongoProp.PORT, (String) testProperties.get( "userpass.auth.port" ) )
           .set( MongoProp.USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
           .set( MongoProp.PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
+          .set(MongoProp.AUTH_DATABASE,(String) testProperties.get("auth.db"))
+          .set(MongoProp.AUTH_MECHA,"SCRAM-SHA-1")
           .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) ).build() },
       { // multi-server CR
         new MongoProperties.Builder()
@@ -112,48 +114,52 @@ public class ClientWrapperIT extends TestBase {
           .set( MongoProp.USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
           .set( MongoProp.PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
           .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
+          .set(MongoProp.AUTH_DATABASE,(String) testProperties.get("auth.db"))
+          .set(MongoProp.AUTH_MECHA,"SCRAM-SHA-1")
           .set( MongoProp.connectionsPerHost, "100" )
           .set( MongoProp.connectTimeout, "10000" )
           .set( MongoProp.maxWaitTime, "12000" )
           .set( MongoProp.readPreference, "primary" )
           .set( MongoProp.cursorFinalizerEnabled, "true" )
-          .set( MongoProp.socketKeepAlive, "false" )
-          .set( MongoProp.socketTimeout, "0" ).build() },
+          .set( MongoProp.socketKeepAlive, "true" )
+          .set( MongoProp.socketTimeout, "30000" ).build() },
       { // secondary read pref CR
         new MongoProperties.Builder()
           .set( MongoProp.HOST, (String) testProperties.get( "multiserver.host" ) )
           .set( MongoProp.USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
           .set( MongoProp.PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
           .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
+          .set(MongoProp.AUTH_DATABASE,(String) testProperties.get("auth.db"))
+          .set(MongoProp.AUTH_MECHA,"SCRAM-SHA-1")
           .set( MongoProp.readPreference, "secondary" )
           .set( MongoProp.writeConcern, Integer.toString( NUM_MONGOS ) )
           .set( MongoProp.cursorFinalizerEnabled, "true" ).build() },
-      { // secondary read pref CR with tag set1
-        new MongoProperties.Builder()
-          .set( MongoProp.HOST, (String) testProperties.get( "multiserver.host" ) )
-          .set( MongoProp.USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
-          .set( MongoProp.PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
-          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
-          .set( MongoProp.readPreference, "secondary" )
-          .set( MongoProp.tagSet, (String) testProperties.get( "tagset1" ) )
-          .set( MongoProp.writeConcern, Integer.toString( NUM_MONGOS ) ).build() },
-      { // secondary read pref CR with tag set2
-        new MongoProperties.Builder()
-          .set( MongoProp.HOST, (String) testProperties.get( "multiserver.host" ) )
-          .set( MongoProp.USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
-          .set( MongoProp.PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
-          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
-          .set( MongoProp.readPreference, "secondary" )
-          .set( MongoProp.tagSet, (String) testProperties.get( "tagset2" ) )
-          .set( MongoProp.writeConcern, Integer.toString( NUM_MONGOS ) ).build() },
-      { // SSL turned on
-        new MongoProperties.Builder()
-          .set( MongoProp.HOST, (String) testProperties.get( "ssl.host" ) )
-          .set( MongoProp.USERNAME, (String) testProperties.get( "ssl.user" ) )
-          .set( MongoProp.PASSWORD, (String) testProperties.get( "ssl.password" ) )
-          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
-          .set( MongoProp.USE_ALL_REPLICA_SET_MEMBERS, "false" )
-          .set( MongoProp.useSSL, "true" ).build() }
+//      { // secondary read pref CR with tag set1
+//        new MongoProperties.Builder()
+//          .set( MongoProp.HOST, (String) testProperties.get( "multiserver.host" ) )
+//          .set( MongoProp.USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
+//          .set( MongoProp.PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
+//          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
+//          .set( MongoProp.readPreference, "secondary" )
+//          .set( MongoProp.tagSet, (String) testProperties.get( "tagset1" ) )
+//          .set( MongoProp.writeConcern, Integer.toString( NUM_MONGOS ) ).build() },
+//      { // secondary read pref CR with tag set2
+//        new MongoProperties.Builder()
+//          .set( MongoProp.HOST, (String) testProperties.get( "multiserver.host" ) )
+//          .set( MongoProp.USERNAME, (String) testProperties.get( "userpass.auth.user" ) )
+//          .set( MongoProp.PASSWORD, (String) testProperties.get( "userpass.auth.password" ) )
+//          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
+//          .set( MongoProp.readPreference, "secondary" )
+//          .set( MongoProp.tagSet, (String) testProperties.get( "tagset2" ) )
+//          .set( MongoProp.writeConcern, Integer.toString( NUM_MONGOS ) ).build() },
+//      { // SSL turned on
+//        new MongoProperties.Builder()
+//          .set( MongoProp.HOST, (String) testProperties.get( "ssl.host" ) )
+//          .set( MongoProp.USERNAME, (String) testProperties.get( "ssl.user" ) )
+//          .set( MongoProp.PASSWORD, (String) testProperties.get( "ssl.password" ) )
+//          .set( MongoProp.DBNAME, (String) testProperties.get( "test.db" ) )
+//          .set( MongoProp.USE_ALL_REPLICA_SET_MEMBERS, "false" )
+//          .set( MongoProp.useSSL, "true" ).build() }
     } );
   }
 
@@ -174,7 +180,7 @@ public class ClientWrapperIT extends TestBase {
       fail( "Could not retrieve replica set status with properties:  " + props );
     }
 
-    final MongoCursorWrapper cursor = wrapper.getCollection( props.get( MongoProp.DBNAME ), "sales" ).find();
+    final MongoCursorWrapper cursor = wrapper.getCollection( props.get( MongoProp.DBNAME ), "inventory" ).find();
 
     cursor.next();
     ServerAddress readServer = cursor.getServerAddress();
