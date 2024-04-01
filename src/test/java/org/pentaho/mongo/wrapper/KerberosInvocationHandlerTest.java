@@ -1,5 +1,5 @@
 /*!
-  * Copyright 2010 - 2017 Hitachi Vantara.  All rights reserved.
+  * Copyright 2010 - 2024 Hitachi Vantara.  All rights reserved.
   *
   * Licensed under the Apache License, Version 2.0 (the "License");
   * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.pentaho.mongo.MongoDbException;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
 public class KerberosInvocationHandlerTest {
