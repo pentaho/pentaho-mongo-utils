@@ -1,4 +1,15 @@
 #!/usr/bin/expect
+# ******************************************************************************
+#
+# Pentaho
+#
+# Copyright (C) 2024 by Hitachi Vantara, LLC : http://www.pentaho.com
+#
+# Use of this software is governed by the Business Source License included
+# in the LICENSE.TXT file.
+#
+# Change Date: 2028-08-13
+# ******************************************************************************
 
 # simple script for retreiving and caching kerberos credentials for a user,
 # as well as storing credentials in a specified keytab file.
